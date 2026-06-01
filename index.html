@@ -1,752 +1,637 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Alpha Estates — Finding Perfect Spaces. Building Futures.</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --gold: #C9A84C;
-    --gold-light: #E8C96A;
-    --gold-dark: #A07830;
-    --dark: #0A0C10;
-    --dark-2: #111318;
-    --dark-3: #1A1D24;
-    --navy: #0D1B2A;
-    --navy-2: #152336;
-    --white: #FFFFFF;
-    --white-70: rgba(255,255,255,0.7);
-    --white-30: rgba(255,255,255,0.3);
-    --white-10: rgba(255,255,255,0.1);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior:smooth; }
-  body { font-family:'Montserrat', sans-serif; background:var(--dark); color:var(--white); overflow-x:hidden; }
-
-  /* ─── SCROLLBAR ─── */
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:var(--dark); }
-  ::-webkit-scrollbar-thumb { background:var(--gold); border-radius:2px; }
-
-  /* ─── NAV ─── */
-  nav {
-    position:fixed; top:0; left:0; right:0; z-index:999;
-    padding:18px 60px;
-    display:flex; align-items:center; justify-content:space-between;
-    background:rgba(10,12,16,0.92);
-    backdrop-filter:blur(20px);
-    border-bottom:1px solid rgba(201,168,76,0.15);
-    transition:all 0.3s;
-  }
-  .nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
-  .nav-logo-icon {
-    width:40px; height:40px;
-    background:linear-gradient(135deg, var(--gold), var(--gold-dark));
-    clip-path:polygon(50% 0%, 100% 100%, 0% 100%);
-    display:flex; align-items:center; justify-content:center;
-    position:relative;
-  }
-  .nav-logo-icon::after {
-    content:''; position:absolute;
-    width:16px; height:16px;
-    background:var(--dark);
-    clip-path:polygon(50% 20%, 85% 90%, 15% 90%);
-  }
-  .nav-brand { display:flex; flex-direction:column; }
-  .nav-brand-main { font-family:'Cormorant Garamond', serif; font-size:22px; font-weight:700; color:var(--white); letter-spacing:4px; line-height:1; }
-  .nav-brand-sub { font-size:8px; font-weight:600; letter-spacing:6px; color:var(--gold); margin-top:2px; }
-  .nav-links { display:flex; gap:36px; list-style:none; }
-  .nav-links a { color:var(--white-70); text-decoration:none; font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; transition:color 0.3s; position:relative; }
-  .nav-links a::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px; background:var(--gold); transition:width 0.3s; }
-  .nav-links a:hover { color:var(--gold); }
-  .nav-links a:hover::after { width:100%; }
-  .nav-cta { padding:10px 24px; background:linear-gradient(135deg, var(--gold), var(--gold-dark)); color:var(--dark); font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.3s; text-decoration:none; }
-  .nav-cta:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(201,168,76,0.4); }
-
-  /* ─── HERO ─── */
-  #home {
-    min-height:100vh;
-    background: linear-gradient(135deg, var(--dark) 0%, var(--navy) 50%, var(--dark-2) 100%);
-    position:relative; overflow:hidden;
-    display:flex; align-items:center;
-  }
-  .hero-bg-pattern {
-    position:absolute; inset:0;
-    background-image:
-      linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
-    background-size:60px 60px;
-  }
-  .hero-bg-glow {
-    position:absolute; top:-20%; right:-10%;
-    width:700px; height:700px;
-    background:radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
-    border-radius:50%;
-  }
-  .hero-bg-glow-2 {
-    position:absolute; bottom:-20%; left:-10%;
-    width:500px; height:500px;
-    background:radial-gradient(circle, rgba(13,27,42,0.8) 0%, transparent 70%);
-    border-radius:50%;
-  }
-  .hero-content {
-    position:relative; z-index:2;
-    padding:120px 60px 80px;
-    max-width:700px;
-  }
-  .hero-badge {
-    display:inline-flex; align-items:center; gap:8px;
-    padding:6px 16px; border:1px solid rgba(201,168,76,0.4);
-    font-size:10px; font-weight:600; letter-spacing:3px; color:var(--gold);
-    text-transform:uppercase; margin-bottom:32px;
-    animation:fadeInUp 0.8s ease both;
-  }
-  .hero-badge::before { content:''; width:6px; height:6px; background:var(--gold); border-radius:50%; }
-  .hero-title {
-    font-family:'Cormorant Garamond', serif;
-    font-size:80px; font-weight:300; line-height:1.05;
-    margin-bottom:8px;
-    animation:fadeInUp 0.8s 0.1s ease both;
-  }
-  .hero-title strong { font-weight:700; color:var(--gold); display:block; }
-  .hero-tagline {
-    font-size:11px; font-weight:600; letter-spacing:5px;
-    color:var(--white-70); text-transform:uppercase;
-    margin-bottom:28px;
-    animation:fadeInUp 0.8s 0.2s ease both;
-  }
-  .hero-desc {
-    font-size:15px; font-weight:300; line-height:1.8;
-    color:var(--white-70); max-width:480px; margin-bottom:48px;
-    animation:fadeInUp 0.8s 0.3s ease both;
-  }
-  .hero-btns { display:flex; gap:16px; animation:fadeInUp 0.8s 0.4s ease both; }
-  .btn-primary { padding:16px 36px; background:linear-gradient(135deg, var(--gold), var(--gold-dark)); color:var(--dark); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.3s; text-decoration:none; }
-  .btn-primary:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(201,168,76,0.4); }
-  .btn-secondary { padding:16px 36px; border:1px solid rgba(201,168,76,0.5); color:var(--gold); font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; background:transparent; cursor:pointer; transition:all 0.3s; text-decoration:none; }
-  .btn-secondary:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); }
-  .hero-stats {
-    position:absolute; right:60px; bottom:80px; z-index:2;
-    display:flex; gap:48px;
-    animation:fadeInUp 0.8s 0.5s ease both;
-  }
-  .stat { text-align:center; }
-  .stat-num { font-family:'Cormorant Garamond', serif; font-size:48px; font-weight:700; color:var(--gold); line-height:1; }
-  .stat-label { font-size:10px; font-weight:600; letter-spacing:2px; color:var(--white-70); text-transform:uppercase; margin-top:4px; }
-  .hero-scroll { position:absolute; bottom:30px; left:60px; display:flex; align-items:center; gap:12px; color:var(--white-30); font-size:10px; letter-spacing:3px; text-transform:uppercase; }
-  .scroll-line { width:40px; height:1px; background:var(--white-30); }
-
-  /* ─── SECTION BASE ─── */
-  section { padding:100px 60px; }
-  .section-label { font-size:10px; font-weight:600; letter-spacing:4px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; display:flex; align-items:center; gap:12px; }
-  .section-label::before { content:''; width:30px; height:1px; background:var(--gold); }
-  .section-title { font-family:'Cormorant Garamond', serif; font-size:54px; font-weight:300; line-height:1.1; margin-bottom:20px; }
-  .section-title strong { font-weight:700; color:var(--gold); }
-  .section-desc { font-size:14px; font-weight:300; line-height:1.8; color:var(--white-70); max-width:560px; }
-  .divider { width:60px; height:2px; background:linear-gradient(90deg, var(--gold), transparent); margin:24px 0; }
-
-  /* ─── ABOUT ─── */
-  #about { background:var(--dark-2); }
-  .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; margin-top:60px; }
-  .about-visual {
-    position:relative; height:500px;
-    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
-    overflow:hidden;
-  }
-  .about-visual::before {
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg, rgba(201,168,76,0.05), transparent);
-  }
-  .about-visual-inner {
-    position:absolute; inset:20px;
-    border:1px solid rgba(201,168,76,0.2);
-    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px;
-  }
-  .about-icon-big { font-size:80px; opacity:0.15; }
-  .about-quote {
-    font-family:'Cormorant Garamond', serif; font-size:28px; font-weight:300;
-    color:var(--white-70); text-align:center; padding:0 30px; line-height:1.5;
-  }
-  .about-quote span { color:var(--gold); font-weight:600; }
-  .about-tag {
-    position:absolute; bottom:20px; right:20px;
-    background:var(--gold); color:var(--dark);
-    font-size:10px; font-weight:700; letter-spacing:2px;
-    padding:8px 16px; text-transform:uppercase;
-  }
-  .about-content { }
-  .about-points { margin-top:36px; display:flex; flex-direction:column; gap:24px; }
-  .about-point { display:flex; gap:20px; align-items:flex-start; }
-  .point-icon { width:44px; height:44px; min-width:44px; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:18px; }
-  .point-text h4 { font-size:13px; font-weight:700; letter-spacing:1px; margin-bottom:6px; text-transform:uppercase; }
-  .point-text p { font-size:13px; font-weight:300; line-height:1.7; color:var(--white-70); }
-  .about-badges { display:flex; gap:16px; margin-top:36px; flex-wrap:wrap; }
-  .badge { padding:10px 20px; border:1px solid rgba(201,168,76,0.3); font-size:10px; font-weight:600; letter-spacing:2px; color:var(--gold); text-transform:uppercase; }
-
-  /* ─── SERVICES ─── */
-  #services { background:var(--dark); }
-  .services-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:60px; }
-  .services-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:2px; }
-  .service-card {
-    background:var(--dark-3); padding:48px 36px;
-    border-top:2px solid transparent;
-    transition:all 0.4s; cursor:default; position:relative; overflow:hidden;
-  }
-  .service-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-    background:linear-gradient(90deg, var(--gold), var(--gold-dark));
-    transform:scaleX(0); transform-origin:left; transition:transform 0.4s;
-  }
-  .service-card::after {
-    content:''; position:absolute; bottom:0; right:0;
-    width:80px; height:80px;
-    background:radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
-    transition:all 0.4s;
-  }
-  .service-card:hover { background:var(--navy); transform:translateY(-4px); }
-  .service-card:hover::before { transform:scaleX(1); }
-  .service-card:hover::after { width:150px; height:150px; }
-  .service-num { font-family:'Cormorant Garamond', serif; font-size:60px; font-weight:700; color:rgba(201,168,76,0.1); line-height:1; margin-bottom:20px; }
-  .service-icon { font-size:32px; margin-bottom:20px; }
-  .service-card h3 { font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; }
-  .service-card p { font-size:13px; font-weight:300; line-height:1.8; color:var(--white-70); }
-  .service-line { width:30px; height:1px; background:var(--gold); margin-top:24px; transition:width 0.4s; }
-  .service-card:hover .service-line { width:60px; }
-
-  /* ─── PROPERTIES ─── */
-  #properties { background:var(--navy); }
-  .prop-tabs { display:flex; gap:0; margin-top:48px; margin-bottom:40px; border-bottom:1px solid rgba(201,168,76,0.2); }
-  .prop-tab { padding:14px 28px; font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--white-70); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.3s; background:none; border-top:none; border-left:none; border-right:none; }
-  .prop-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
-  .prop-tab:hover { color:var(--gold); }
-  .prop-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; }
-  .prop-card { background:var(--dark-2); overflow:hidden; transition:transform 0.3s; }
-  .prop-card:hover { transform:translateY(-6px); }
-  .prop-img { height:220px; background:linear-gradient(135deg, var(--dark-3), var(--navy-2)); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-  .prop-img-inner { font-size:60px; opacity:0.1; }
-  .prop-img-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(10,12,16,0.8), transparent); }
-  .prop-type { position:absolute; top:16px; left:16px; background:var(--gold); color:var(--dark); font-size:9px; font-weight:700; letter-spacing:2px; padding:5px 12px; text-transform:uppercase; }
-  .prop-body { padding:24px; }
-  .prop-name { font-family:'Cormorant Garamond', serif; font-size:22px; font-weight:600; margin-bottom:8px; }
-  .prop-loc { font-size:11px; color:var(--white-70); letter-spacing:1px; margin-bottom:16px; display:flex; align-items:center; gap:6px; }
-  .prop-features { display:flex; gap:16px; margin-bottom:20px; }
-  .prop-feat { font-size:11px; color:var(--white-70); display:flex; align-items:center; gap:4px; }
-  .prop-price { font-family:'Cormorant Garamond', serif; font-size:28px; font-weight:700; color:var(--gold); }
-  .prop-price-label { font-size:10px; color:var(--white-70); font-weight:400; margin-left:4px; }
-  .prop-cta { display:block; text-align:center; padding:12px; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.3); color:var(--gold); font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; text-decoration:none; margin-top:20px; transition:all 0.3s; }
-  .prop-cta:hover { background:var(--gold); color:var(--dark); }
-  .prop-note { text-align:center; margin-top:40px; padding:20px; border:1px solid rgba(201,168,76,0.2); }
-  .prop-note p { font-size:13px; color:var(--white-70); }
-  .prop-note strong { color:var(--gold); }
-
-  /* ─── WHY US ─── */
-  #why { background:var(--dark-2); }
-  .why-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin-top:60px; }
-  .why-card { padding:48px; background:var(--dark-3); display:flex; gap:24px; transition:background 0.3s; }
-  .why-card:hover { background:var(--navy); }
-  .why-card:nth-child(1) { background:linear-gradient(135deg, var(--gold), var(--gold-dark)); color:var(--dark); }
-  .why-card:nth-child(1) .why-icon { background:rgba(0,0,0,0.1); }
-  .why-card:nth-child(1) p { color:rgba(10,12,16,0.7); }
-  .why-icon { width:52px; height:52px; min-width:52px; background:rgba(201,168,76,0.1); display:flex; align-items:center; justify-content:center; font-size:22px; }
-  .why-text h3 { font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
-  .why-text p { font-size:13px; font-weight:300; line-height:1.7; color:var(--white-70); }
-  .why-card:nth-child(1) .why-text p { color:rgba(10,12,16,0.7); }
-
-  /* ─── CONTACT ─── */
-  #contact { background:var(--dark); }
-  .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; margin-top:60px; }
-  .contact-info { }
-  .contact-item { display:flex; gap:20px; align-items:flex-start; margin-bottom:36px; }
-  .contact-icon { width:48px; height:48px; min-width:48px; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.2); display:flex; align-items:center; justify-content:center; font-size:20px; }
-  .contact-detail h4 { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
-  .contact-detail p { font-size:14px; font-weight:300; color:var(--white-70); line-height:1.6; }
-  .contact-detail a { color:var(--white); text-decoration:none; transition:color 0.3s; }
-  .contact-detail a:hover { color:var(--gold); }
-  .contact-social { margin-top:48px; }
-  .contact-social h4 { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--white-70); text-transform:uppercase; margin-bottom:20px; }
-  .social-links { display:flex; gap:12px; }
-  .social-link { width:44px; height:44px; border:1px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:16px; text-decoration:none; transition:all 0.3s; }
-  .social-link:hover { background:var(--gold); border-color:var(--gold); transform:translateY(-3px); }
-  .contact-form { }
-  .form-group { margin-bottom:24px; }
-  .form-group label { display:block; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
-  .form-group input, .form-group textarea, .form-group select {
-    width:100%; padding:14px 18px;
-    background:var(--dark-3); border:1px solid rgba(201,168,76,0.2);
-    color:var(--white); font-family:'Montserrat', sans-serif; font-size:13px;
-    outline:none; transition:border-color 0.3s;
-    -webkit-appearance:none;
-  }
-  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--gold); }
-  .form-group textarea { height:120px; resize:none; }
-  .form-group select option { background:var(--dark-3); }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .form-submit { width:100%; padding:18px; background:linear-gradient(135deg, var(--gold), var(--gold-dark)); color:var(--dark); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.3s; }
-  .form-submit:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(201,168,76,0.35); }
-
-  /* ─── PARTNERS ─── */
-  .partners-bar {
-    background:var(--dark-3); padding:30px 60px;
-    display:flex; align-items:center; justify-content:center; gap:60px;
-    border-top:1px solid rgba(201,168,76,0.1);
-    border-bottom:1px solid rgba(201,168,76,0.1);
-    flex-wrap:wrap;
-  }
-  .partner-label { font-size:10px; font-weight:600; letter-spacing:3px; color:var(--white-30); text-transform:uppercase; }
-  .partner-item { font-size:13px; font-weight:700; letter-spacing:2px; color:var(--white-70); text-transform:uppercase; display:flex; align-items:center; gap:10px; }
-  .partner-dot { width:6px; height:6px; background:var(--gold); border-radius:50%; }
-
-  /* ─── FOOTER ─── */
-  footer { background:var(--dark-2); padding:48px 60px; }
-  .footer-inner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px; }
-  .footer-brand { font-family:'Cormorant Garamond', serif; font-size:28px; font-weight:700; letter-spacing:4px; }
-  .footer-brand span { color:var(--gold); }
-  .footer-tagline { font-size:11px; font-weight:300; letter-spacing:2px; color:var(--white-70); margin-top:4px; }
-  .footer-links { display:flex; gap:28px; }
-  .footer-links a { color:var(--white-70); text-decoration:none; font-size:11px; letter-spacing:1px; transition:color 0.3s; }
-  .footer-links a:hover { color:var(--gold); }
-  .footer-copy { font-size:11px; color:var(--white-30); letter-spacing:1px; }
-  .footer-rera { font-size:11px; color:var(--white-30); margin-top:4px; }
-  .footer-divider { width:100%; height:1px; background:rgba(201,168,76,0.1); margin:24px 0; }
-
-  /* ─── ANIMATIONS ─── */
-  @keyframes fadeInUp {
-    from { opacity:0; transform:translateY(30px); }
-    to { opacity:1; transform:translateY(0); }
-  }
-  .fade-in { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease, transform 0.7s ease; }
-  .fade-in.visible { opacity:1; transform:translateY(0); }
-
-  /* ─── MOBILE ─── */
-  @media(max-width:768px) {
-    nav { padding:16px 24px; }
-    .nav-links, .nav-cta { display:none; }
-    section { padding:70px 24px; }
-    .hero-content { padding:100px 24px 60px; }
-    .hero-title { font-size:48px; }
-    .hero-stats { position:static; flex-direction:row; justify-content:flex-start; padding:0 24px 60px; gap:32px; }
-    .about-grid, .contact-grid { grid-template-columns:1fr; gap:40px; }
-    .services-grid, .why-grid { grid-template-columns:1fr; }
-    .prop-grid { grid-template-columns:1fr; }
-    .services-header { flex-direction:column; align-items:flex-start; gap:20px; }
-    nav { padding:16px 24px; }
-    .partners-bar { padding:24px; gap:24px; }
-    footer { padding:36px 24px; }
-    .footer-inner { flex-direction:column; align-items:flex-start; }
-    .form-row { grid-template-columns:1fr; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Estates — Premium Property Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            DEFAULT: '#C9A84C',
+                            light: '#E8C96A',
+                            dark: '#A07830',
+                        },
+                        dark: {
+                            DEFAULT: '#080A0E',
+                            card: '#0F1117',
+                            elevated: '#161920',
+                        },
+                        navy: '#0B1628',
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #080A0E;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080A0E;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C9A84C;
+        }
+        .luxury-grid {
+            background-image: 
+                linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .luxury-blur-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, rgba(11,22,40,0) 70%);
+            filter: blur(60px);
+            pointer-events: none;
+        }
+        .fade-in-active {
+            animation: luxuryFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes luxuryFade {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body>
+<body class="text-white font-sans overflow-x-hidden selection:bg-gold selection:text-dark">
 
-<!-- NAV -->
-<nav>
-  <a href="#home" class="nav-logo">
-    <div class="nav-logo-icon"></div>
-    <div class="nav-brand">
-      <span class="nav-brand-main">ALPHA</span>
-      <span class="nav-brand-sub">Estates</span>
-    </div>
-  </a>
-  <ul class="nav-links">
-    <li><a href="#home">Home</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#properties">Properties</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <a href="#contact" class="nav-cta">Get Consultation</a>
-</nav>
-
-<!-- HERO -->
-<section id="home">
-  <div class="hero-bg-pattern"></div>
-  <div class="hero-bg-glow"></div>
-  <div class="hero-bg-glow-2"></div>
-  <div class="hero-content">
-    <div class="hero-badge">RERA Registered · MSME Certified</div>
-    <h1 class="hero-title">Finding Perfect<br><strong>Spaces.</strong></h1>
-    <p class="hero-tagline">Building Futures — Mumbai's Trusted Property Guidance Partner</p>
-    <p class="hero-desc">We don't just show properties — we help you make the right decision. Expert guidance for residential, commercial, and investment properties across Mumbai.</p>
-    <div class="hero-btns">
-      <a href="#properties" class="btn-primary">Explore Properties</a>
-      <a href="#contact" class="btn-secondary">Free Consultation</a>
-    </div>
-  </div>
-  <div class="hero-stats">
-    <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Happy Clients</div></div>
-    <div class="stat"><div class="stat-num">100+</div><div class="stat-label">Projects</div></div>
-    <div class="stat"><div class="stat-num">5+</div><div class="stat-label">Years Experience</div></div>
-  </div>
-  <div class="hero-scroll"><div class="scroll-line"></div>Scroll to Explore</div>
-</section>
-
-<!-- PARTNERS BAR -->
-<div class="partners-bar">
-  <span class="partner-label">In Strategic Association With</span>
-  <div class="partner-item"><div class="partner-dot"></div>Mokal Realtors</div>
-  <div class="partner-item"><div class="partner-dot"></div>RERA No. A51900034053</div>
-  <div class="partner-item"><div class="partner-dot"></div>MSME / Udyam Registered</div>
-</div>
-
-<!-- ABOUT -->
-<section id="about">
-  <div class="fade-in">
-    <div class="section-label">Who We Are</div>
-    <div class="about-grid">
-      <div class="about-visual">
-        <div class="about-visual-inner">
-          <div class="about-icon-big">🏛️</div>
-          <div class="about-quote">"Guiding You Today,<br><span>Growing Your Tomorrow.</span>"</div>
-        </div>
-        <div class="about-tag">Est. Mumbai</div>
-      </div>
-      <div class="about-content">
-        <h2 class="section-title">Your Trusted<br><strong>Property Partner</strong></h2>
-        <div class="divider"></div>
-        <p class="section-desc">Alpha Estates is a property guidance specialist focused on helping clients make informed real estate decisions. We work directly with trusted developers and companies who officially partner with us for genuine projects.</p>
-        <div class="about-points">
-          <div class="about-point">
-            <div class="point-icon">✅</div>
-            <div class="point-text">
-              <h4>Verified Projects Only</h4>
-              <p>Every project is carefully verified for credibility, legal approvals and developer background.</p>
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 border-b border-white/[0.03] bg-dark/40 backdrop-blur-md py-6 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="#" onclick="showSection('portal-view')" class="flex items-center gap-3 no-underline group">
+                <div class="w-[36px] h-[36px] bg-gradient-to-br from-gold via-gold-light to-gold-dark [clip-path:polygon(50%_0%,100%_100%,0%_100%)] relative after:content-[''] after:absolute after:top-[42%] after:left-[50%] after:-translate-x-1/2 after:-translate-y-[42%] after:w-4 after:h-4 after:bg-dark after:[clip-path:polygon(50%_15%,88%_90%,12%_90%)] group-hover:rotate-180 transition-transform duration-700 ease-out"></div>
+                <div class="leading-none">
+                    <span class="font-serif text-xl font-bold tracking-[5px] text-white block">ALPHA</span>
+                    <span class="text-[8px] font-bold tracking-[6px] text-gold uppercase block mt-0.5">Estates</span>
+                </div>
+            </a>
+            
+            <div class="hidden lg:flex items-center gap-10">
+                <a href="#home" onclick="showSection('portal-view')" class="text-white/60 hover:text-gold text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 font-sans">Home</a>
+                <a href="#about" onclick="showSection('portal-view')" class="text-white/60 hover:text-gold text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 font-sans">Identity</a>
+                <a href="#projects" onclick="showSection('portal-view')" class="text-white/60 hover:text-gold text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 font-sans">Registry</a>
+                <a href="#services" onclick="showSection('portal-view')" class="text-white/60 hover:text-gold text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 font-sans">Capabilities</a>
             </div>
-          </div>
-          <div class="about-point">
-            <div class="point-icon">📊</div>
-            <div class="point-text">
-              <h4>Future Appreciation Analysis</h4>
-              <p>We analyse location, infrastructure and market trends to guide your future growth.</p>
+
+            <div>
+                <button onclick="showSection('login-view')" class="inline-flex items-center gap-2 py-2.5 px-5 border border-gold/30 text-[9px] font-bold tracking-widest text-gold uppercase hover:bg-gold hover:text-dark transition-all duration-500 font-sans bg-transparent">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Operator Console
+                </button>
             </div>
-          </div>
-          <div class="about-point">
-            <div class="point-icon">🔒</div>
-            <div class="point-text">
-              <h4>Legal & Documentation Check</h4>
-              <p>We verify all legal documents and approvals to ensure a safe and secure transaction.</p>
+        </div>
+    </nav>
+
+    <div id="portal-view" class="section-container block">
+        
+        <header id="home" class="relative min-h-screen bg-gradient-to-br from-dark via-navy to-dark-card flex items-center px-6 md:px-12 pt-[100px] pb-16 overflow-hidden">
+            <div class="absolute inset-0 luxury-grid opacity-50 pointer-events-none"></div>
+            <div class="luxury-blur-glow top-[-10%] right-[-5%] animate-pulse"></div>
+            <div class="luxury-blur-glow bottom-[-20%] left-[-10%]"></div>
+            
+            <div class="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-8 fade-in-active">
+                    <div class="inline-flex items-center gap-3 py-2 px-4 border border-gold/30 bg-gold/5 text-[9px] font-bold tracking-[3px] text-gold uppercase font-sans">
+                        <span class="w-1.5 h-1.5 bg-gold rounded-full animate-ping"></span> Maharashtra Strategic Corridor 2026
+                    </div>
+                    <h1 class="font-serif text-5xl md:text-7xl font-light leading-[1.1] text-white">
+                        Architecting <br>
+                        <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold-dark">Sovereign Asset Layouts</span>
+                    </h1>
+                    <p class="text-[11px] font-bold tracking-[6px] text-white/50 uppercase font-sans">Badlapur • Ambernath • Taloja Nodes</p>
+                    <p class="text-sm md:text-base font-light text-white/40 max-w-[540px] leading-relaxed font-sans">
+                        End-to-end luxury investment mapping and ultra-premium architectural structures. Engineered exclusively for sophisticated wealth allocation portfolios.
+                    </p>
+                    <div class="pt-4 flex flex-wrap gap-4">
+                        <a href="#projects" class="py-4 px-8 bg-gradient-to-br from-gold to-gold-dark text-dark text-[11px] font-bold tracking-widest uppercase hover:shadow-[0_10px_30px_rgba(201,168,76,0.3)] transition-all duration-500 font-sans font-bold">Explore Active Registry</a>
+                        <a href="#about" class="py-4 px-8 border border-white/10 hover:border-gold hover:text-gold text-[11px] font-bold tracking-widest uppercase transition-all duration-300 font-sans">Corporate Manifesto</a>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-5 hidden lg:block relative h-[520px] border border-white/[0.05] bg-dark-card/40 backdrop-blur-sm p-8 group">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-40 transition-opacity duration-700" style="background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80');"></div>
+                    <div class="absolute inset-0 luxury-grid opacity-20"></div>
+                    <div class="border border-gold/10 w-full h-full flex flex-col justify-between p-8 relative z-10">
+                        <div class="font-serif text-sm tracking-widest text-gold italic">Alpha Manifesto Framework</div>
+                        <div class="space-y-4">
+                            <div class="h-[2px] w-12 bg-gold"></div>
+                            <p class="font-serif text-3xl font-light text-white/90 leading-snug">"Luxury is the ultimate structural alignment of geometric clarity and isolation."</p>
+                            <p class="text-[9px] tracking-widest text-white/30 uppercase font-sans">© Alpha Architecture Group Board</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="about-badges">
-          <div class="badge">MSME Registered</div>
-          <div class="badge">RERA Certified</div>
-          <div class="badge">Trusted Since Day 1</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+        </header>
 
-<!-- SERVICES -->
-<section id="services">
-  <div class="fade-in">
-    <div class="services-header">
-      <div>
-        <div class="section-label">What We Offer</div>
-        <h2 class="section-title">Our <strong>Services</strong></h2>
-      </div>
-      <p style="max-width:300px;font-size:13px;color:var(--white-70);font-weight:300;line-height:1.8;">Comprehensive real estate solutions tailored to your needs and budget.</p>
-    </div>
-    <div class="services-grid">
-      <div class="service-card">
-        <div class="service-num">01</div>
-        <div class="service-icon">🏠</div>
-        <h3>Residential Properties</h3>
-        <p>Find your dream home with our curated selection of verified residential properties across Mumbai — apartments, villas, and more.</p>
-        <div class="service-line"></div>
-      </div>
-      <div class="service-card">
-        <div class="service-num">02</div>
-        <div class="service-icon">🏢</div>
-        <h3>Commercial Properties</h3>
-        <p>We help you choose the right commercial property that grows your business — offices, shops, and commercial spaces.</p>
-        <div class="service-line"></div>
-      </div>
-      <div class="service-card">
-        <div class="service-num">03</div>
-        <div class="service-icon">📈</div>
-        <h3>Investment Guidance</h3>
-        <p>Expert advice on rental yield, demand and long-term returns for your real estate investment portfolio.</p>
-        <div class="service-line"></div>
-      </div>
-      <div class="service-card">
-        <div class="service-num">04</div>
-        <div class="service-icon">🌍</div>
-        <h3>Land & Plots</h3>
-        <p>Access verified land parcels and plots across prime locations with complete legal documentation support.</p>
-        <div class="service-line"></div>
-      </div>
-      <div class="service-card">
-        <div class="service-num">05</div>
-        <div class="service-icon">💰</div>
-        <h3>Budget-Fit Options</h3>
-        <p>We ensure you get the best property within your budget without compromising on quality or location.</p>
-        <div class="service-line"></div>
-      </div>
-      <div class="service-card">
-        <div class="service-num">06</div>
-        <div class="service-icon">📋</div>
-        <h3>Property Consulting</h3>
-        <p>End-to-end property consulting — from site visits to final registration — we stay with you till your query ends.</p>
-        <div class="service-line"></div>
-      </div>
-    </div>
-  </div>
-</section>
+        <section id="about" class="py-24 px-6 md:px-12 bg-dark-elevated border-t border-b border-white/[0.03]">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <span class="text-[9px] font-bold tracking-widest text-gold uppercase block font-sans">Corporate Protocol</span>
+                    <h2 class="font-serif text-4xl font-light tracking-wide text-white">The Sovereign Elite <span class="font-bold text-gold">Standard</span></h2>
+                    <p class="text-sm text-white/40 leading-relaxed font-sans">
+                        We direct high-tier real estate placements inside premium industrial and suburban growth nodes. Our properties integrate deep structural compliance layouts with exceptional architectural finish metrics, securing both aesthetic value and capital retention profiles.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-dark p-8 border border-white/5 group hover:border-gold/30 transition-all duration-300">
+                        <div class="font-serif text-4xl font-bold text-gold">100%</div>
+                        <div class="text-[9px] tracking-widest uppercase text-white/40 font-sans mt-2">Title Assurance Clarity</div>
+                    </div>
+                    <div class="bg-dark p-8 border border-white/5 group hover:border-gold/30 transition-all duration-300">
+                        <div class="font-serif text-4xl font-bold text-gold">₹250C+</div>
+                        <div class="text-[9px] tracking-widest uppercase text-white/40 font-sans mt-2">Allocated Assets Value</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<!-- PROPERTIES -->
-<section id="properties">
-  <div class="fade-in">
-    <div class="section-label">Our Listings</div>
-    <h2 class="section-title">Featured <strong>Properties</strong></h2>
-    <div class="divider"></div>
-    <div class="prop-tabs">
-      <button class="prop-tab active">All</button>
-      <button class="prop-tab">Residential</button>
-      <button class="prop-tab">Commercial</button>
-      <button class="prop-tab">Investment</button>
-    </div>
-    <div class="prop-grid">
-      <div class="prop-card">
-        <div class="prop-img">
-          <div class="prop-img-inner">🏙️</div>
-          <div class="prop-img-overlay"></div>
-          <div class="prop-type">Residential</div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-name">Premium 2BHK Apartment</div>
-          <div class="prop-loc">📍 Wadala, Mumbai</div>
-          <div class="prop-features">
-            <span class="prop-feat">🛏 2 BHK</span>
-            <span class="prop-feat">🚿 2 Bath</span>
-            <span class="prop-feat">📐 950 sqft</span>
-          </div>
-          <div class="prop-price">₹85L <span class="prop-price-label">onwards</span></div>
-          <a href="#contact" class="prop-cta">Enquire Now</a>
-        </div>
-      </div>
-      <div class="prop-card">
-        <div class="prop-img">
-          <div class="prop-img-inner">🏢</div>
-          <div class="prop-img-overlay"></div>
-          <div class="prop-type">Commercial</div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-name">Office Space</div>
-          <div class="prop-loc">📍 Andheri, Mumbai</div>
-          <div class="prop-features">
-            <span class="prop-feat">💼 Office</span>
-            <span class="prop-feat">🅿️ Parking</span>
-            <span class="prop-feat">📐 1200 sqft</span>
-          </div>
-          <div class="prop-price">₹1.2Cr <span class="prop-price-label">onwards</span></div>
-          <a href="#contact" class="prop-cta">Enquire Now</a>
-        </div>
-      </div>
-      <div class="prop-card">
-        <div class="prop-img">
-          <div class="prop-img-inner">🌿</div>
-          <div class="prop-img-overlay"></div>
-          <div class="prop-type">Investment</div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-name">Plot — High Growth Zone</div>
-          <div class="prop-loc">📍 Navi Mumbai</div>
-          <div class="prop-features">
-            <span class="prop-feat">📐 2000 sqft</span>
-            <span class="prop-feat">📈 High ROI</span>
-            <span class="prop-feat">✅ Verified</span>
-          </div>
-          <div class="prop-price">₹60L <span class="prop-price-label">onwards</span></div>
-          <a href="#contact" class="prop-cta">Enquire Now</a>
-        </div>
-      </div>
-    </div>
-    <div class="prop-note">
-      <p>Looking for something specific? <strong>Contact us for our complete property portfolio</strong> — we have 100+ verified listings across Mumbai.</p>
-    </div>
-  </div>
-</section>
+        <section id="projects" class="py-24 px-6 md:px-12 bg-dark">
+            <div class="max-w-7xl mx-auto mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <span class="text-[9px] font-bold tracking-widest text-gold uppercase block font-sans">Curated Architectural Suite</span>
+                    <h2 class="font-serif text-4xl md:text-5xl font-light tracking-wide text-white mt-2">Active <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">Investment Portfolios</span></h2>
+                </div>
+                <p class="text-xs text-white/40 max-w-[400px] font-sans">Live active synchronization data layer showcasing premium estate assets available in our network hubs.</p>
+            </div>
 
-<!-- WHY US -->
-<section id="why" style="padding-top:0;">
-  <div class="fade-in">
-    <div style="padding:100px 0 60px;">
-      <div class="section-label">Why Choose Us</div>
-      <h2 class="section-title">Our <strong>Goal Is Simple</strong></h2>
-      <p class="section-desc">No wrong investment. No confusion. No regret after buying.</p>
-    </div>
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="why-icon">🎯</div>
-        <div class="why-text">
-          <h3>Right Decision Every Time</h3>
-          <p>We don't just sell properties — we ensure you make the best decision for your future.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">🛡️</div>
-        <div class="why-text">
-          <h3>100% Transparent Deals</h3>
-          <p>Safe investment with transparent deals — no hidden charges, no surprises.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">📞</div>
-        <div class="why-text">
-          <h3>Always With You</h3>
-          <p>We stay till your query ends, not till the booking ends. Support beyond the deal.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">🤝</div>
-        <div class="why-text">
-          <h3>Strong Network</h3>
-          <p>Strong connections with verified developers and RERA registered channel partners across Mumbai.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+            <div id="property-grid" class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+        </section>
 
-<!-- CONTACT -->
-<section id="contact">
-  <div class="fade-in">
-    <div class="section-label">Get In Touch</div>
-    <h2 class="section-title">Let's Find Your<br><strong>Perfect Space</strong></h2>
-    <div class="divider"></div>
-    <div class="contact-grid">
-      <div class="contact-info">
-        <div class="contact-item">
-          <div class="contact-icon">📞</div>
-          <div class="contact-detail">
-            <h4>Call Us</h4>
-            <p><a href="tel:+917219088105">+91 72190 88105</a></p>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">✉️</div>
-          <div class="contact-detail">
-            <h4>Email Us</h4>
-            <p><a href="mailto:Alphaestate3639@gmail.com">Alphaestate3639@gmail.com</a></p>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📍</div>
-          <div class="contact-detail">
-            <h4>Visit Us</h4>
-            <p>166, Jai Shivaji Nagar,<br>GD Ambekarmarg, Wadala,<br>Mumbai — 400031</p>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">🌐</div>
-          <div class="contact-detail">
-            <h4>Services</h4>
-            <p>Property Guidance | Investments | Consulting</p>
-          </div>
-        </div>
-        <div class="contact-social">
-          <h4>Follow Us</h4>
-          <div class="social-links">
-            <a href="#" class="social-link">f</a>
-            <a href="#" class="social-link">in</a>
-            <a href="#" class="social-link">📷</a>
-            <a href="https://wa.me/917219088105" class="social-link">💬</a>
-          </div>
-        </div>
-      </div>
-      <div class="contact-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Your Name</label>
-            <input type="text" placeholder="Full Name"/>
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" placeholder="+91 XXXXX XXXXX"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" placeholder="your@email.com"/>
-        </div>
-        <div class="form-group">
-          <label>I Am Looking For</label>
-          <select>
-            <option>Residential Property</option>
-            <option>Commercial Property</option>
-            <option>Investment / Plot</option>
-            <option>Property Consulting</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Your Budget</label>
-          <select>
-            <option>Under ₹50 Lakhs</option>
-            <option>₹50L – ₹1 Crore</option>
-            <option>₹1Cr – ₹2 Crore</option>
-            <option>Above ₹2 Crore</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Message</label>
-          <textarea placeholder="Tell us about your requirements..."></textarea>
-        </div>
-        <button class="form-submit">Send Enquiry →</button>
-      </div>
+        <section id="services" class="py-24 px-6 md:px-12 bg-dark-card border-t border-white/[0.04]">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-14">
+                    <span class="text-[9px] font-bold tracking-widest text-gold uppercase block font-sans">Operational Competence Matrix</span>
+                    <h2 class="font-serif text-4xl font-light tracking-wide text-white mt-1">Strategic <span class="font-bold text-gold">Execution Pillars</span></h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-dark-elevated p-8 border border-white/[0.03] space-y-4 hover:border-gold/20 transition-all duration-500">
+                        <div class="text-gold text-xs font-mono">01 // LAYER</div>
+                        <h4 class="font-serif text-2xl font-medium text-white tracking-wide">Premium Site Logistics</h4>
+                        <p class="text-xs text-white/40 font-sans leading-relaxed">High-fidelity location profiling across industrial growth junctions to optimize land-lease structures.</p>
+                    </div>
+                    <div class="bg-dark-elevated p-8 border border-white/[0.03] space-y-4 hover:border-gold/20 transition-all duration-500">
+                        <div class="text-gold text-xs font-mono">02 // LAYER</div>
+                        <h4 class="font-serif text-2xl font-medium text-white tracking-wide">RERA Due Diligence Map</h4>
+                        <p class="text-xs text-white/40 font-sans leading-relaxed">Absolute legal synchronization safeguarding client equity acquisitions before foundation layouts begin.</p>
+                    </div>
+                    <div class="bg-dark-elevated p-8 border border-white/[0.03] space-y-4 hover:border-gold/20 transition-all duration-500">
+                        <div class="text-gold text-xs font-mono">03 // LAYER</div>
+                        <h4 class="font-serif text-2xl font-medium text-white tracking-wide">Sovereign Architecture</h4>
+                        <p class="text-xs text-white/40 font-sans leading-relaxed">Curating geometric, low-density modern environments engineered for multi-generational asset retention.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
-  </div>
-</section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div>
-      <div class="footer-brand">ALPHA <span>ESTATES</span></div>
-      <div class="footer-tagline">Finding Perfect Spaces. Building Futures.</div>
+    <div id="login-view" class="section-container hidden min-h-screen flex relative overflow-hidden">
+        <div class="hidden lg:flex w-[50%] bg-gradient-to-br from-dark via-navy to-dark-card p-16 flex-col justify-between relative border-r border-white/[0.05]">
+            <div class="absolute inset-0 luxury-grid opacity-30 pointer-events-none"></div>
+            <a href="#" onclick="showSection('portal-view')" class="flex items-center gap-3 relative z-10">
+                <div class="w-[32px] h-[32px] bg-gradient-to-br from-gold to-gold-dark [clip-path:polygon(50%_0%,100%_100%,0%_100%)]"></div>
+                <span class="font-serif text-lg font-bold tracking-[4px] text-white">ALPHA CONTROL</span>
+            </a>
+            <div class="relative z-10 space-y-4">
+                <span class="text-[9px] font-bold tracking-widest text-gold uppercase block">Operator Verification Terminal</span>
+                <h2 class="font-serif text-5xl font-light text-white leading-tight">Institutional <br><span class="font-bold text-gold italic">Data Console</span></h2>
+                <p class="text-xs text-white/40 max-w-[380px] leading-relaxed">Authorized entry points to alter live system asset layouts visible across the client display array nodes.</p>
+            </div>
+            <div class="text-[9px] font-mono tracking-widest text-white/20 uppercase">Alpha Security Group Node Core v4</div>
+        </div>
+
+        <div class="w-full lg:w-[50%] bg-dark-card flex items-center justify-center p-8 relative">
+            <div class="absolute inset-0 luxury-grid opacity-10 lg:hidden"></div>
+            <div class="w-full max-w-[360px] space-y-8 relative z-10">
+                <div>
+                    <span class="text-[9px] font-bold tracking-widest text-gold uppercase block mb-1">Access Protocol Loop</span>
+                    <h2 class="font-serif text-3xl font-light text-white">Identity Challenge</h2>
+                    <p class="text-xs text-white/40 mt-1">Provide registered operator mobile credentials to pull challenge token passcodes.</p>
+                </div>
+
+                <form id="otp-step-1" onsubmit="handleOtpRequest(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-[9px] font-bold tracking-[2px] uppercase text-white/50 mb-2">Whitelisted Phone Node</label>
+                        <div class="flex border border-white/[0.08] bg-dark-elevated focus-within:border-gold transition-colors">
+                            <span class="p-4 text-sm font-semibold text-gold bg-white/[0.02] border-r border-white/[0.08]">+91</span>
+                            <input id="login-phone" type="tel" required pattern="[0-9]{10}" maxLength="10" placeholder="9876543210" class="w-full bg-transparent p-4 text-sm text-white outline-none tracking-[3px]">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-gradient-to-br from-gold to-gold-dark text-dark text-[11px] font-bold tracking-widest uppercase transition-all duration-300">Dispatch Request Token</button>
+                </form>
+
+                <form id="otp-step-2" onsubmit="handleOtpVerification(event)" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-[9px] font-bold tracking-[2px] uppercase text-white/50 mb-3">Transient Authorization Passcode (Enter any 4 digits to test)</label>
+                        <div class="flex justify-between gap-3">
+                            <input type="text" maxLength="1" required class="otp-input w-14 h-16 text-center text-2xl font-serif font-bold bg-dark-elevated border border-white/[0.08] text-gold focus:border-gold outline-none">
+                            <input type="text" maxLength="1" required class="otp-input w-14 h-16 text-center text-2xl font-serif font-bold bg-dark-elevated border border-white/[0.08] text-gold focus:border-gold outline-none">
+                            <input type="text" maxLength="1" required class="otp-input w-14 h-16 text-center text-2xl font-serif font-bold bg-dark-elevated border border-white/[0.08] text-gold focus:border-gold outline-none">
+                            <input type="text" maxLength="1" required class="otp-input w-14 h-16 text-center text-2xl font-serif font-bold bg-dark-elevated border border-white/[0.08] text-gold focus:border-gold outline-none">
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] mt-3">
+                            <span class="text-white/30">Token active for 60 seconds</span>
+                            <span onclick="resetLoginStep()" class="text-gold cursor-pointer font-medium hover:underline">Reset Node Route</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-gradient-to-br from-gold to-gold-dark text-dark text-[11px] font-bold tracking-widest uppercase transition-all duration-300">Establish Secure Session</button>
+                </form>
+
+                <button onclick="showSection('portal-view')" class="w-full text-center text-[10px] text-white/40 tracking-wider uppercase hover:text-white transition-colors pt-2 block">✕ Terminate Request Loop</button>
+            </div>
+        </div>
     </div>
-    <div class="footer-links">
-      <a href="#home">Home</a>
-      <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="#properties">Properties</a>
-      <a href="#contact">Contact</a>
+
+    <div id="admin-view" class="section-container hidden min-h-screen bg-dark pt-28 pb-16 px-6 md:px-12">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/[0.06] pb-6 gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="font-serif text-3xl font-light text-white tracking-wide">Asset Control Studio</h1>
+                        <span class="text-[8px] bg-gold/10 text-gold border border-gold/20 font-mono py-0.5 px-2 uppercase tracking-widest">Sandbox Local Matrix Active</span>
+                    </div>
+                    <p class="text-xs text-white/40 mt-1">Inject premium new properties dynamically into the active frontend framework registry.</p>
+                </div>
+                <button onclick="logoutAdmin()" class="py-2 px-4 border border-white/10 text-[9px] tracking-widest uppercase text-white/60 hover:text-white hover:border-white transition-all">Clear Authentication Session</button>
+            </div>
+
+            <div class="bg-dark-card border border-white/[0.04] p-8 relative overflow-hidden">
+                <div class="absolute inset-0 luxury-grid opacity-10 pointer-events-none"></div>
+                <h3 class="font-serif text-xl text-gold mb-6 tracking-wide">Deploy New Architectural Node Specifications</h3>
+                
+                <form onsubmit="handleCreateAsset(event)" class="space-y-6 relative z-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Asset Module Name</label>
+                            <input id="add-name" type="text" required placeholder="e.g., Thanekar BKC Elevate Phase 3" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Investment Entry Price</label>
+                            <input id="add-price" type="text" required placeholder="e.g., ₹45 Lakhs" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Geographic Location Area</label>
+                            <input id="add-location" type="text" required placeholder="e.g., Katrap City, Badlapur" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Development Classification</label>
+                            <select id="add-type" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                                <option value="Residential">Residential Sector Module</option>
+                                <option value="Commercial">Commercial Infrastructure</option>
+                                <option value="Plots">Sovereign Plot Lots</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Internal Configurations</label>
+                            <input id="add-beds" type="text" placeholder="e.g., 2 & 3 BHK Elite Matrix" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Footprint Dimensions (Sq.Ft.)</label>
+                            <input id="add-sqft" type="text" placeholder="e.g., 1,050 - 1,450" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Luxury Imagery Sample Anchor</label>
+                            <select id="add-image" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                                <option value="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80">Luxury Villa Layout Accent</option>
+                                <option value="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80">Corporate Steel Skyliner Accent</option>
+                                <option value="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80">Sovereign Open Landscape Accent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[9px] font-bold tracking-wider uppercase text-white/60 mb-2">Curated Project Tagline Motto</label>
+                        <input id="add-tagline" type="text" placeholder="e.g., High-Rise Landmark Redefining Modern Living Frameworks" class="w-full bg-dark-elevated border border-white/[0.08] p-3.5 text-sm text-white outline-none focus:border-gold transition-colors font-sans">
+                    </div>
+
+                    <div class="pt-4 border-t border-white/[0.04]">
+                        <button type="submit" class="py-4 px-8 bg-gradient-to-br from-gold to-gold-dark text-dark text-[11px] font-bold tracking-widest uppercase hover:shadow-[0_10px_30px_rgba(201,168,76,0.3)] transition-all duration-300 font-bold">Inject Asset Into Network Registry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div>
-      <div class="footer-copy">© 2025 Alpha Estates. All Rights Reserved.</div>
-      <div class="footer-rera">RERA No. A51900034053 | MSME/Udyam Registered</div>
+
+    <div id="inquiry-modal" class="fixed inset-0 z-[99999] hidden flex items-center justify-center p-4 bg-dark/90 backdrop-blur-md">
+        <div class="relative w-full max-w-[480px] bg-dark-card border border-gold/20 p-8 md:p-10 shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
+            <button onclick="closeInquiryModal()" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center bg-white/[0.03] text-white/60 hover:text-white border border-white/5 hover:bg-gold/10 transition-all duration-300">✕</button>
+            
+            <div id="modal-form-state">
+                <form onsubmit="executeModalHandover(event)" class="space-y-6">
+                    <div>
+                        <span class="text-[9px] font-bold tracking-[3px] text-gold uppercase block mb-1">Secure Request Routing</span>
+                        <h2 class="font-serif text-3xl font-light tracking-wide text-white">Access <span class="font-bold text-gold">Digital Suite</span></h2>
+                        <p class="text-xs text-white/40 mt-1">Validation generates dynamic encryption passes to download blueprints instantly.</p>
+                    </div>
+
+                    <div class="bg-dark-elevated border-l-2 border-gold p-4">
+                        <span class="text-[8px] tracking-widest uppercase text-gold/70 block">Target Asset Allocation</span>
+                        <h4 id="modal-target-name" class="font-serif text-lg font-medium text-white mt-0.5">---</h4>
+                        <p class="text-xs text-white/50"><span id="modal-target-loc">---</span> • <span id="modal-target-price" class="text-gold font-medium">---</span></p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/50 mb-2">Client Full Name</label>
+                            <input id="client-name" type="text" required placeholder="e.g., Vikramaditya Singh" class="w-full bg-dark-elevated border border-white/[0.08] p-4 text-sm text-white outline-none focus:border-gold transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold tracking-wider uppercase text-white/50 mb-2">WhatsApp Routing Node</label>
+                            <div class="flex border border-white/[0.08] bg-dark-elevated focus-within:border-gold transition-colors">
+                                <span class="p-4 text-sm font-semibold text-gold bg-white/[0.02] border-r border-white/[0.08]">+91</span>
+                                <input id="client-phone" type="tel" required pattern="[0-9]{10}" maxLength="10" placeholder="9876543210" class="w-full bg-transparent p-4 text-sm text-white outline-none tracking-widest">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-gradient-to-br from-gold to-gold-dark text-dark text-[11px] font-bold tracking-widest uppercase transition-all duration-300">Generate Cryptographic Handover Pass</button>
+                </form>
+            </div>
+
+            <div id="modal-success-state" class="hidden text-center py-8 space-y-4">
+                <div class="w-16 h-16 bg-gold/10 border border-gold/40 rounded-full flex items-center justify-center mx-auto text-gold text-2xl font-light">✓</div>
+                <h3 class="font-serif text-2xl font-medium tracking-wide text-white">Identity Verified Securely</h3>
+                <p class="text-xs text-white/40 max-w-[300px] mx-auto leading-relaxed">Connecting your secure matrix node directly to our premium messaging network infrastructure...</p>
+                <div class="w-12 h-[1px] bg-gold/30 mx-auto pt-2 animate-pulse"></div>
+            </div>
+        </div>
     </div>
-  </div>
-</footer>
 
-<script>
-  // Scroll fade-in
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); } });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    <footer class="bg-dark-card border-t border-white/[0.04] py-12 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+                <div class="font-serif text-2xl font-bold tracking-[4px] text-white">ALPHA ESTATES</div>
+                <p class="text-[10px] text-white/30 tracking-widest uppercase mt-1">High-Performance Sovereign Property Modules • Node 2026 Core</p>
+            </div>
+            <div class="text-center md:text-right">
+                <p class="text-[10px] text-white/40 tracking-wider">Strictly Standalone Premium Phase 1 Functional Testing Runtime Asset Sandbox.</p>
+                <p class="text-[9px] text-gold font-mono uppercase tracking-widest mt-1">Zero Live Downstream Sub-System Risk Bound Confirmed</p>
+            </div>
+        </div>
+    </footer>
 
-  // Nav scroll effect
-  window.addEventListener('scroll', () => {
-    const nav = document.querySelector('nav');
-    nav.style.padding = window.scrollY > 50 ? '12px 60px' : '18px 60px';
-  });
+    <script>
+        // Memory Cluster Initialization Database (Client Side Active Engine)
+        let ASSET_REGISTRY = [
+            {
+                id: 'thanekar-bkc',
+                name: 'Thanekar BKC Elevate',
+                location: 'Katrap City, Badlapur',
+                price: '₹45 Lakhs',
+                type: 'Residential',
+                beds: '2 & 3 BHK',
+                sqft: '1,050 - 1,450',
+                verified: true,
+                tagline: 'Premium Residential Skyline Landmark Hub',
+                img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'alpha-midc-hub',
+                name: 'Alpha MIDC Corporate Hub',
+                location: 'Ambernath Industrial Area',
+                price: '₹1.2 Crores',
+                type: 'Commercial',
+                beds: 'Executive Office Suites',
+                sqft: '2,500 - 8,000',
+                verified: true,
+                tagline: 'High-Performance Institutional Corporate Spaces Matrix',
+                img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'sovereign-enclave',
+                name: 'The Sovereign Enclave',
+                location: 'Taloja Green Corridor',
+                price: '₹85 Lakhs',
+                type: 'Plots',
+                beds: 'Custom Estate Layout Lots',
+                sqft: '4,000 Open Base',
+                verified: false,
+                tagline: 'Premium Secure Land Lots for Ultra-Luxury Estates',
+                img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80'
+            }
+        ];
 
-  // Property tabs
-  document.querySelectorAll('.prop-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.prop-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    });
-  });
+        let activeTargetInquiryAsset = null;
 
-  // Form submit
-  document.querySelector('.form-submit').addEventListener('click', () => {
-    alert('Thank you! We will contact you within 24 hours. 🏠');
-  });
-</script>
+        // Window Display Context Router Viewport Switches
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-container').forEach(el => {
+                el.classList.remove('block');
+                el.classList.add('hidden');
+            });
+            const target = document.getElementById(sectionId);
+            target.classList.remove('hidden');
+            target.classList.add('block');
+            window.scrollTo(0,0);
+            
+            // Adjust header overlay navigation rules
+            const nav = document.getElementById('navbar');
+            if (sectionId !== 'portal-view') {
+                nav.classList.add('bg-dark-card');
+                nav.classList.remove('bg-dark/40');
+            } else {
+                nav.classList.remove('bg-dark-card');
+                nav.classList.add('bg-dark/40');
+            }
+        }
+
+        // Real-time Compilation Render Motor Node Array loops
+        function compileRegistryView() {
+            const container = document.getElementById('property-grid');
+            container.innerHTML = '';
+            
+            ASSET_REGISTRY.forEach(asset => {
+                const node = document.createElement('div');
+                node.className = "bg-dark-card border border-white/[0.04] overflow-hidden transition-all duration-500 hover:border-gold/30 group flex flex-col relative opacity-0 fade-in-active";
+                node.innerHTML = `
+                    <div class="h-[240px] bg-dark-elevated relative overflow-hidden flex items-center justify-center border-b border-white/[0.04]">
+                        <div class="absolute inset-0 bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('${asset.img}');"></div>
+                        <div class="absolute inset-0 luxury-grid opacity-30"></div>
+                        <span class="absolute text-white/[0.02] text-[90px] font-serif font-bold tracking-widest select-none pointer-events-none group-hover:text-gold/[0.03] transition-colors duration-500">ALPHA</span>
+                        <div class="absolute top-5 left-5 bg-gold text-dark text-[8px] font-bold tracking-[2px] px-3 py-1.5 uppercase font-sans">${asset.type}</div>
+                        ${asset.verified ? `<div class="absolute top-5 right-5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[8px] font-semibold tracking-widest px-3 py-1.5 uppercase font-sans">MahaRERA Live</div>` : ''}
+                        <div class="absolute inset-0 bg-dark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center gap-3 p-6 z-10">
+                            <p class="text-center font-serif text-base text-gold/90 italic max-w-[220px]">${asset.tagline}</p>
+                            <button onclick="openInquiryModal('${asset.id}')" class="mt-4 px-5 py-2.5 bg-gold text-dark text-[10px] font-bold tracking-[2px] uppercase hover:bg-white transition-colors duration-300">Request Blueprint File</button>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card via-transparent to-transparent opacity-90"></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif text-2xl font-medium text-white group-hover:text-gold transition-colors duration-300 tracking-wide mb-1">${asset.name}</h3>
+                            <p class="text-xs text-white/40 tracking-wider flex items-center gap-1.5 mb-5 font-sans">📍 ${asset.location}</p>
+                            <div class="grid grid-cols-2 gap-4 border-t border-b border-white/[0.05] py-4 mb-6">
+                                <div>
+                                    <span class="block text-[8px] tracking-[2px] text-white/30 uppercase mb-0.5">Architecture Model</span>
+                                    <span class="text-[11px] font-medium text-white/80 tracking-wide">${asset.beds}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[8px] tracking-[2px] text-white/30 uppercase mb-0.5">Built-Up Footprint</span>
+                                    <span class="text-[11px] font-medium text-white/80 tracking-wide">${asset.sqft} Sq.Ft.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <span class="block text-[8px] tracking-wider text-white/40 uppercase">Baseline Anchor Valuation</span>
+                                <div class="font-serif text-2xl font-bold text-gold tracking-wide">${asset.price} <small class="text-[10px] font-sans font-light tracking-normal text-white/40">onwards</small></div>
+                            </div>
+                            <button onclick="openInquiryModal('${asset.id}')" class="p-3 border border-gold/20 text-gold hover:bg-gold hover:text-dark transition-all duration-300">➔</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(node);
+            });
+        }
+
+        // Active Communication Handover Modal Dialog Targets
+        function openInquiryModal(assetId) {
+            activeTargetInquiryAsset = ASSET_REGISTRY.find(item => item.id === assetId);
+            if(!activeTargetInquiryAsset) return;
+
+            document.getElementById('modal-target-name').innerText = activeTargetInquiryAsset.name;
+            document.getElementById('modal-target-loc').innerText = activeTargetInquiryAsset.location;
+            document.getElementById('modal-target-price').innerText = activeTargetInquiryAsset.price;
+            
+            document.getElementById('modal-form-state').style.display = 'block';
+            document.getElementById('modal-success-state').style.display = 'none';
+            document.getElementById('inquiry-modal').style.display = 'flex';
+        }
+
+        function closeInquiryModal() {
+            document.getElementById('inquiry-modal').style.display = 'none';
+        }
+
+        function executeModalHandover(event) {
+            event.preventDefault();
+            document.getElementById('modal-form-state').style.display = 'none';
+            document.getElementById('modal-success-state').style.display = 'block';
+
+            // Safe, direct validation handover parameters routing to your live WhatsApp engine
+            const clientName = document.getElementById('client-name').value;
+            const absoluteMessageString = encodeURIComponent(
+                `Greetings Alpha Board! I am ${clientName}. I would like to request high-fidelity structural layouts, brochures, and digital allocations for: ${activeTargetInquiryAsset.name} (${activeTargetInquiryAsset.location}) priced onwards from ${activeTargetInquiryAsset.price}. Please assign a dedicated executive coordinator node.`
+            );
+
+            setTimeout(() => {
+                window.open(`https://wa.me/917219088105?text=${absoluteMessageString}`, '_blank');
+                closeInquiryModal();
+                document.getElementById('client-name').value = '';
+                document.getElementById('client-phone').value = '';
+            }, 1200);
+        }
+
+        // Operator Verification Engine State Controls
+        function handleOtpRequest(e) {
+            e.preventDefault();
+            const inputVal = document.getElementById('login-phone').value;
+            if(inputVal.length === 10) {
+                document.getElementById('otp-step-1').classList.add('hidden');
+                document.getElementById('otp-step-2').classList.remove('hidden');
+                document.querySelectorAll('.otp-input')[0].focus();
+            }
+        }
+
+        function handleOtpVerification(e) {
+            e.preventDefault();
+            // Bypass logic loop allows instantaneous sandbox routing check
+            showSection('admin-view');
+            resetLoginStep();
+        }
+
+        function resetLoginStep() {
+            document.getElementById('otp-step-1').classList.remove('hidden');
+            document.getElementById('otp-step-2').classList.add('hidden');
+            document.getElementById('login-phone').value = '';
+            document.querySelectorAll('.otp-input').forEach(el => el.value = '');
+        }
+
+        function logoutAdmin() {
+            showSection('portal-view');
+        }
+
+        // Dynamic Database Structural Array Appends (Admin Operation Matrix)
+        function handleCreateAsset(e) {
+            e.preventDefault();
+            
+            const newAssetPayload = {
+                id: 'dynamic-' + Date.now(),
+                name: document.getElementById('add-name').value,
+                price: document.getElementById('add-price').value,
+                location: document.getElementById('add-location').value,
+                type: document.getElementById('add-type').value,
+                beds: document.getElementById('add-beds').value || 'Elite Unit Configurations Matrix',
+                sqft: document.getElementById('add-sqft').value || '1,500',
+                verified: true,
+                tagline: document.getElementById('add-tagline').value || 'Premium Corporate Masterpiece Development Framework Architecture',
+                img: document.getElementById('add-image').value
+            };
+
+            ASSET_REGISTRY.unshift(newAssetPayload);
+            compileRegistryView();
+            
+            // Clean interface configurations
+            document.getElementById('add-name').value = '';
+            document.getElementById('add-price').value = '';
+            document.getElementById('add-location').value = '';
+            document.getElementById('add-beds').value = '';
+            document.getElementById('add-sqft').value = '';
+            document.getElementById('add-tagline').value = '';
+            
+            alert('Asset Module Published! Navigating directly back onto active customer visualization portal to monitor update arrays.');
+            showSection('portal-view');
+            window.location.hash = "projects";
+        }
+
+        // OTP inputs field step configuration shifts focus mapping helper
+        document.querySelectorAll('.otp-input').forEach((element, index, originalArray) => {
+            element.addEventListener('input', (e) => {
+                if(e.target.value && originalArray[index + 1]) {
+                    originalArray[index + 1].focus();
+                }
+            });
+        });
+
+        // Dynamic Scroll Styling Engine
+        window.addEventListener('scroll', () => {
+            const navNode = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navNode.classList.add('bg-dark/95', 'py-4', 'border-gold/15');
+                navNode.classList.remove('bg-dark/40', 'py-6', 'border-white/[0.03]');
+            } else {
+                navNode.classList.remove('bg-dark/95', 'py-4', 'border-gold/15');
+                navNode.classList.add('bg-dark/40', 'py-6', 'border-white/[0.03]');
+            }
+        });
+
+        // Initial Engine Spin Bootup
+        document.addEventListener('DOMContentLoaded', () => {
+            compileRegistryView();
+        });
+    </script>
 </body>
 </html>

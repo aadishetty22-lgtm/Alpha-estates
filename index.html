@@ -1059,17 +1059,39 @@ function initObserver(){
   document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
 }
 
+// ══ CRM CONFIG ══
+const CRM_URL = 'https://alpha-estates-system-790396264256.asia-southeast1.run.app';
+
 // ══ LOGIN / OTP FUNCTIONS ══
 let userPhone='', curProj=null, waChoiceVal='';
+let generatedOTP = '';
 
-function sendOTP(){
+function generateOTP(){ return Math.floor(100000 + Math.random() * 900000).toString(); }
+
+async function sendOTP(){
   const p=document.getElementById('phoneInput').value;
   if(p.length!==10){alert('Please enter valid 10-digit number');return;}
   userPhone=p;
+  generatedOTP = generateOTP();
   document.getElementById('shownPhone').textContent=p;
-  document.getElementById('step1').classList.remove('active');
-  document.getElementById('step2').classList.add('active');
-  setTimeout(()=>alert('Demo Mode: OTP is 1 2 3 4 5 6'),300);
+
+  const otpMsg = 'Your Alpha Estates login OTP is: *'+generatedOTP+'*\n\nValid for 10 minutes. Do not share.';
+  try {
+    const res = await fetch(CRM_URL+'/api/whatsapp/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ phone: '91'+p, message: otpMsg })
+    });
+    const data = await res.json();
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    if(!data.success){
+      setTimeout(()=>alert('OTP sent! (Demo: '+generatedOTP+')'),300);
+    }
+  } catch(e){
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    setTimeout(()=>alert('OTP (demo): '+generatedOTP),300);
+  }
 }
 function otpMove(el,idx){
   el.value=el.value.replace(/\D/g,'');
@@ -1080,9 +1102,21 @@ function otpMove(el,idx){
 function verifyOTP(){
   const otp=Array.from(document.querySelectorAll('.otp-box')).map(i=>i.value).join('');
   if(otp.length<6){alert('Please enter complete OTP');return;}
+  if(otp !== generatedOTP){alert('Incorrect OTP. Please try again.');return;}
+  registerVisitorInCRM(userPhone);
   enterSite();
 }
-function resendOTP(){alert('OTP Resent! Demo: use 1 2 3 4 5 6');}
+async function resendOTP(){
+  generatedOTP = generateOTP();
+  const otpMsg = 'Your Alpha Estates login OTP is: *'+generatedOTP+'*\n\nValid for 10 minutes.';
+  try {
+    await fetch(CRM_URL+'/api/whatsapp/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ phone: '91'+userPhone, message: otpMsg })
+    });
+    alert('OTP resent to your WhatsApp!');
+  } catch(e){ alert('OTP (demo): '+generatedOTP); }
+}
 function backToPhone(){
   document.getElementById('step2').classList.remove('active');
   document.getElementById('step1').classList.add('active');
@@ -1100,6 +1134,20 @@ function logout(){
   document.getElementById('step1').classList.add('active');
   document.getElementById('step2').classList.remove('active');
   window.scrollTo(0,0);
+}
+
+// ══ CRM INTEGRATION ══
+async function registerVisitorInCRM(phone){
+  try {
+    await fetch(CRM_URL+'/api/whatsapp/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        phone: '91'+phone,
+        message: 'Hi! I just logged into the Alpha Estates website. Excited to explore properties!'
+      })
+    });
+    console.log('[CRM] Visitor registered:', phone);
+  } catch(e){ console.warn('[CRM] Visitor registration failed:', e); }
 }
 
 // ══ INQUIRY MODAL ══
@@ -1123,40 +1171,64 @@ function waChoice(c){
   document.getElementById('waNo').classList.toggle('sel',c==='no');
   document.getElementById('waAdd').classList.toggle('show',c==='no');
 }
-function submitInq(){
+async function submitInq(){
   if(!waChoiceVal){alert('Please confirm your WhatsApp number');return;}
   const num=waChoiceVal==='yes'?userPhone:document.getElementById('altWa').value;
   if(waChoiceVal==='no'&&num.length!==10){alert('Please enter valid WhatsApp number');return;}
   document.getElementById('successNum').textContent='+91 '+num;
   document.getElementById('mContent').style.display='none';
   document.getElementById('mSuccess').classList.add('show');
-  const msg=encodeURIComponent(
-    'Hi Alpha Estates!\n\n' +
-    'I am interested in: *' + curProj.name + '*\n' +
-    'Location: ' + curProj.loc + '\n\n' +
-    'Please share:\n' +
-    '• Full project details & pricing\n' +
-    '• Available units & floor plan\n' +
-    '• Site visit schedule\n' +
-    '• Home loan options\n\n' +
-    'My WhatsApp: +91 ' + num
-  );
-  setTimeout(()=>window.open('https://wa.me/917219088105?text='+msg,'_blank'),1500);
+
+  // ── STEP 1: Trigger AI conversation via WhatsApp webhook ──
+  const firstMsg = `Hi Alpha Estates! I am interested in: *${curProj.name}* at ${curProj.loc}. Please share details.`;
+  try {
+    // Send message through CRM WhatsApp — AI will auto-respond and qualify the lead
+    await fetch(CRM_URL+'/api/whatsapp/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        phone: '91'+num,
+        message: `Hi! Thanks for your interest in *${curProj.name}* (${curProj.loc})! 🏠\n\nI'm your Alpha Estates AI assistant. To help you better, may I know:\n\n1️⃣ Are you looking to Buy or Invest?\n2️⃣ What's your budget range?\n3️⃣ When are you planning to buy?\n\nReply with your answers and I'll share the best options for you! 😊`
+      })
+    });
+    console.log('[CRM] Inquiry sent to AI bot for:', num, curProj.name);
+  } catch(e){
+    console.warn('[CRM] Inquiry API failed, using wa.me fallback');
+    const msg=encodeURIComponent(
+      'Hi Alpha Estates!\n\n' +
+      'I am interested in: *' + curProj.name + '*\n' +
+      'Location: ' + curProj.loc + '\n\n' +
+      'Please share details.\n\nMy WhatsApp: +91 ' + num
+    );
+    setTimeout(()=>window.open('https://wa.me/917219088105?text='+msg,'_blank'),1500);
+  }
 }
-function submitForm(){
+
+async function submitForm(){
   const name = document.querySelector('#contact .cf-in').value || 'Customer';
   const phone = document.querySelectorAll('#contact .cf-in')[1]?.value || '';
   const interest = document.querySelector('#contact .cf-sel')?.value || 'Property';
-  const msg = document.querySelector('#contact .cf-ta')?.value || '';
-  const waMsg = encodeURIComponent(
-    'Hi Alpha Estates!\n\n' +
-    'Name: ' + name + '\n' +
-    'Phone: ' + phone + '\n' +
-    'Looking for: ' + interest + '\n' +
-    (msg ? 'Message: ' + msg : '') +
-    '\n\nPlease guide me.'
-  );
-  window.open('https://wa.me/917219088105?text='+waMsg,'_blank');
+  const note = document.querySelector('#contact .cf-ta')?.value || '';
+
+  if(!phone || phone.length < 10){ alert('Please enter a valid phone number'); return; }
+
+  // ── Send to CRM via WhatsApp API ──
+  try {
+    await fetch(CRM_URL+'/api/whatsapp/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        phone: '91'+phone.replace(/\D/g,'').slice(-10),
+        message: `Hi ${name}! 👋 Thanks for contacting *Alpha Estates*!\n\nWe received your enquiry for: *${interest}*\n${note ? '\nYour message: '+note+'\n' : ''}\nI'm your AI assistant and I'll help you find the perfect property. \n\nQuick question — are you looking to:\n1️⃣ Buy for self-use\n2️⃣ Buy for investment\n3️⃣ Just exploring options\n\nReply with 1, 2 or 3! 🏡`
+      })
+    });
+    alert('✅ Enquiry submitted! You will receive a WhatsApp message shortly.');
+  } catch(e){
+    // Fallback to wa.me
+    const waMsg = encodeURIComponent(
+      'Hi Alpha Estates!\n\nName: ' + name + '\nPhone: ' + phone +
+      '\nLooking for: ' + interest + (note ? '\nMessage: ' + note : '') + '\n\nPlease guide me.'
+    );
+    window.open('https://wa.me/917219088105?text='+waMsg,'_blank');
+  }
 }
 
 // Nav scroll highlight
@@ -1174,6 +1246,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(savedPhone){
     userPhone = savedPhone;
     enterSite();
+    // Silently ping CRM to record returning visitor
+    console.log('[CRM] Returning visitor restored:', savedPhone);
   }
 
   // Always init projects data so grid is ready

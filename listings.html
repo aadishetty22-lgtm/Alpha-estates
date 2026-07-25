@@ -300,7 +300,7 @@
   <div class="divider"></div>
   <div class="hero-actions">
     <a href="#grid" class="hero-btn primary" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'});return false;">Explore Listings</a>
-    <a href="https://wa.me/?text=Hi%20Alpha%20Estates%2C%20I%27m%20interested%20in%20a%20property." target="_blank" class="hero-btn ghost">Enquire on WhatsApp</a>
+    <a href="https://wa.me/917219088105?text=Hi%20Alpha%20Estates%2C%20I%27m%20interested%20in%20a%20property." target="_blank" class="hero-btn ghost">Enquire on WhatsApp</a>
   </div>
   <button class="agent-toggle" id="agentToggle">Agent Login</button>
 </header>
@@ -451,7 +451,7 @@ function currency(v){
 
 function waLink(p){
   const text = `*${p.title}*\n${p.category} | ${p.location}\n${currency(p.price)}${p.area? ' | '+p.area+' sq.ft':''}${p.bedrooms? ' | '+p.bedrooms+' BHK':''}\n\n${(p.description||'').slice(0,180)}\n\n— Alpha Estates\nBuilding Trust. Delivering Value.`;
-  return 'https://wa.me/?text=' + encodeURIComponent(text);
+  return 'https://wa.me/917219088105?text=' + encodeURIComponent(text);
 }
 
 function renderCards(){
@@ -470,7 +470,7 @@ function renderCards(){
       <span class="serif">No ${activeFilter==='All' ? 'properties' : activeFilter.toLowerCase()} listed right now</span>
       ${desc}
       <div class="actions">
-        <a href="https://wa.me/?text=Hi%20Alpha%20Estates%2C%20I%27m%20looking%20for%20a%20property%20in%20${encodeURIComponent(label)}." target="_blank" class="hero-btn primary">Tell Us What You Need</a>
+        <a href="https://wa.me/917219088105?text=Hi%20Alpha%20Estates%2C%20I%27m%20looking%20for%20a%20property%20in%20${encodeURIComponent(label)}." target="_blank" class="hero-btn primary">Tell Us What You Need</a>
       </div>
     `;
   }

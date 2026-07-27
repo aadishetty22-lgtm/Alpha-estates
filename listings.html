@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alpha Estates</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0b">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alpha Estates">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -247,6 +256,9 @@
   .pin-gate input{text-align:center;letter-spacing:4px;margin:14px 0;}
   footer{text-align:center;padding:30px;color:var(--gold-dim);font-size:11.5px;letter-spacing:1px;border-top:1px solid var(--line);}
   @media(max-width:640px){.form-grid{grid-template-columns:1fr;} .modal .gallery{height:260px;}}
+  @media(max-width:700px){
+    .grid{grid-template-columns:repeat(2,1fr)!important;gap:22px 12px;}
+  }
   @media(max-width:420px){
     header{padding:40px 14px 26px;}
     .seal{width:120px;}
@@ -255,8 +267,9 @@
     .trust{padding:36px 14px 34px;}
     nav{padding:12px 10px;gap:6px;}
     nav button{padding:8px 13px;font-size:12px;}
-    .grid{gap:16px;}
-    .grid{gap:22px 14px;}
+    .grid{grid-template-columns:repeat(2,1fr)!important;gap:18px 10px;}
+    .card h3{font-size:13.5px;}
+    .card .price{font-size:13px;}
   }
 </style>
 </head>
@@ -450,7 +463,7 @@ function currency(v){
 }
 
 function waLink(p){
-  const text = `*${p.title}*\n${p.category} | ${p.location}\n${currency(p.price)}${p.area? ' | '+p.area+' sq.ft':''}${p.bedrooms? ' | '+p.bedrooms+' BHK':''}\n\n${(p.description||'').slice(0,180)}\n\n— Alpha Estates\nBuilding Trust. Delivering Value.`;
+  const text = `*${p.title}*\n${currency(p.price)}\n\nHi, I'm interested in this property. Please share more details.\n\n— Alpha Estates\nBuilding Trust. Delivering Value.`;
   return 'https://wa.me/917219088105?text=' + encodeURIComponent(text);
 }
 
@@ -545,8 +558,7 @@ function openModal(p){
       ${p.video? `<a class="video-link" href="${p.video}" target="_blank">▶ Watch Video Tour</a>` : ''}
       ${p.contact? `<div class="contact-line">Contact: ${p.contact}</div>` : ''}
       <div class="modal-actions">
-        <a href="${waLink(p)}" target="_blank" class="btn-primary" style="color:#0a0a0b;">Share on WhatsApp</a>
-        <button class="btn-ghost" onclick="copyLink('${p.id}')">Copy Details</button>
+        <a href="${waLink(p)}" target="_blank" class="btn-primary" style="color:#0a0a0b;">Enquire Now</a>
       </div>
     </div>
   `;
@@ -740,6 +752,10 @@ window.closeModal = closeModal;
 window.shiftGallery = shiftGallery;
 window.copyLink = copyLink;
 window.removeDraftPhoto = removeDraftPhoto;
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
 
 subscribeProperties();
 </script>

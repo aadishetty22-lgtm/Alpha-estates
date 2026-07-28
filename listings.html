@@ -203,7 +203,7 @@
     margin-top:20px;position:relative;overflow:hidden;
   }
   .modal-close{position:absolute;top:14px;right:16px;background:rgba(0,0,0,.5);border:1px solid var(--line);color:var(--cream);width:32px;height:32px;border-radius:50%;font-size:16px;z-index:5;}
-  .modal .gallery{position:relative;height:380px;background:#000;}
+  .modal .gallery{position:relative;height:380px;background:#000;touch-action:pan-y;}
   .modal .gallery img{width:100%;height:100%;object-fit:cover;}
   .gallery-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);border:none;color:var(--gold-bright);width:38px;height:38px;border-radius:50%;font-size:18px;}
   .gallery-nav.prev{left:14px;} .gallery-nav.next{right:14px;}
@@ -224,6 +224,22 @@
   .modal-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
   .modal-actions button, .modal-actions a{padding:12px 20px;border-radius:8px;font-size:13.5px;letter-spacing:.5px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
   .contact-line{margin-top:10px;color:var(--grey);font-size:13px;}
+  .urgency-badge{
+    display:inline-flex;align-items:center;gap:6px;background:rgba(200,60,50,.14);border:1px solid rgba(220,90,70,.4);
+    color:#f0a08a;font-size:12.5px;padding:6px 12px;border-radius:20px;margin-top:10px;
+  }
+  .highlight-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .highlight-badge{
+    background:rgba(205,162,61,.1);border:1px solid var(--gold-dim);color:var(--gold-bright);
+    font-size:11.5px;padding:6px 11px;border-radius:16px;
+  }
+  .lock-panel{
+    margin-top:20px;padding:24px 20px;background:var(--panel-2);border:1px dashed var(--gold-dim);border-radius:12px;text-align:center;
+  }
+  .lock-icon{font-size:28px;margin-bottom:8px;}
+  .lock-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold-bright);margin-bottom:6px;}
+  .lock-sub{font-size:13px;color:var(--grey);margin-bottom:16px;line-height:1.6;}
+  .lock-panel input{margin-bottom:10px;}
 
   /* ---------- admin form ---------- */
   .admin-panel{
@@ -529,19 +545,35 @@ function renderCards(){
   });
 }
 
+const unlockedSet = new Set();
+
 function openModal(p){
   galleryIndex[p.id] = 0;
+  window._galleryData = p;
+  renderModalContent(p, unlockedSet.has(p.id));
+  $('#overlay').classList.add('show');
+}
+
+function renderModalContent(p, unlocked){
   const box = $('#modalBox');
-  const photos = (p.photos && p.photos.length) ? p.photos : null;
+  const allPhotos = (p.photos && p.photos.length) ? p.photos : null;
+  const visiblePhotos = unlocked ? allPhotos : (allPhotos ? [allPhotos[0]] : null);
+  const extraCount = allPhotos ? Math.max(0, allPhotos.length - 1) : 0;
+
+  const highlightBadges = [];
+  if(p.highlights && p.highlights.price) highlightBadges.push('💰 Special Negotiated Price');
+  if(p.highlights && p.highlights.visit) highlightBadges.push('🚗 Free Site Visit');
+  if(p.highlights && p.highlights.loan) highlightBadges.push('🏦 Bank Loan Support');
 
   box.innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="gallery" id="galleryWrap">
-      ${photos ? `<img id="galleryImg" src="${photos[0]}">
-        ${photos.length>1 ? `
+      ${visiblePhotos ? `<img id="galleryImg" src="${visiblePhotos[0]}">
+        ${unlocked && visiblePhotos.length>1 ? `
         <button class="gallery-nav prev" onclick="shiftGallery('${p.id}',-1)">‹</button>
         <button class="gallery-nav next" onclick="shiftGallery('${p.id}',1)">›</button>
-        <div class="gallery-dots" id="dots">${photos.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : ''}
+        <div class="gallery-dots" id="dots">${visiblePhotos.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : ''}
+        ${!unlocked && extraCount>0 ? `<div class="photocount" style="left:10px;right:auto;">🔒 +${extraCount} more</div>` : ''}
       ` : `<div class="noimg" style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--gold-dim)">NO PHOTOS ADDED YET</div>`}
     </div>
     <div class="modal-body">
@@ -549,22 +581,90 @@ function openModal(p){
       <h2 class="serif">${p.title}</h2>
       <div class="loc">📍 ${p.location}</div>
       <div class="price">${currency(p.price)}</div>
+      ${p.urgency ? `<div class="urgency-badge">🔥 ${p.urgency}</div>` : ''}
+      ${highlightBadges.length ? `<div class="highlight-row">${highlightBadges.map(h=>`<span class="highlight-badge">${h}</span>`).join('')}</div>` : ''}
       <div class="stat-row">
         ${p.bedrooms? `<div>Bedrooms<b>${p.bedrooms} BHK</b></div>`:''}
         ${p.area? `<div>Area<b>${p.area} sq.ft</b></div>`:''}
         <div>Category<b>${p.category}</b></div>
       </div>
-      <div class="desc">${(p.description||'No description added yet.')}</div>
-      ${p.video? `<a class="video-link" href="${p.video}" target="_blank">▶ Watch Video Tour</a>` : ''}
-      ${p.contact? `<div class="contact-line">Contact: ${p.contact}</div>` : ''}
+      ${unlocked ? `
+        <div class="desc">${(p.description||'No description added yet.')}</div>
+        ${p.video? `<a class="video-link" href="${p.video}" target="_blank">▶ Watch Video Tour</a>` : ''}
+        ${p.contact? `<div class="contact-line">Contact: ${p.contact}</div>` : ''}
+      ` : `
+        <div class="lock-panel">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-title">Full Pricing Breakdown${extraCount>0? ` & ${extraCount} More Photos` : ''} Locked</div>
+          <div class="lock-sub">Enter your number to unlock complete details, floor plans & exclusive pricing.</div>
+          <input id="unlock_name" placeholder="Your Name">
+          <input id="unlock_phone" placeholder="Your Phone Number" type="tel">
+          <button class="btn-primary" id="unlockBtn" style="width:100%;justify-content:center;">Unlock Full Details</button>
+          <div id="unlockError" style="color:#e08787;font-size:12px;margin-top:8px;"></div>
+        </div>
+      `}
       <div class="modal-actions">
         <a href="${waLink(p)}" target="_blank" class="btn-primary" style="color:#0a0a0b;">Enquire Now</a>
       </div>
     </div>
   `;
-  window._galleryData = p;
-  $('#overlay').classList.add('show');
+
+  if(!unlocked){
+    $('#unlockBtn').onclick = ()=>handleUnlock(p);
+  }
+
+  if(unlocked && visiblePhotos && visiblePhotos.length>1){
+    const wrap = $('#galleryWrap');
+    let touchStartX = 0;
+    wrap.addEventListener('touchstart', e=>{ touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+    wrap.addEventListener('touchend', e=>{
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if(Math.abs(dx) > 40){ shiftGallery(p.id, dx < 0 ? 1 : -1); }
+    }, {passive:true});
+  }
 }
+
+async function handleUnlock(p){
+  const name = $('#unlock_name').value.trim();
+  const phone = $('#unlock_phone').value.trim();
+  if(!name || !phone || phone.length<7){
+    $('#unlockError').textContent = 'Naam aur sahi phone number daaliye.';
+    return;
+  }
+  const btn = $('#unlockBtn');
+  btn.textContent = 'Unlocking...'; btn.disabled = true;
+  try{
+    await saveLead(p, name, phone);
+  }catch(e){ console.error(e); }
+  unlockedSet.add(p.id);
+  renderModalContent(p, true);
+}
+
+async function saveLead(p, name, phone){
+  const leadId = 'lead_' + Date.now();
+  await setDoc(doc(db, 'alpha_leads', leadId), {
+    id: leadId, name, phone,
+    propertyId: p.id, propertyTitle: p.title,
+    category: p.category, location: p.location,
+    createdAt: Date.now()
+  });
+  const msg = `🔓 Alpha Estates — Details Unlocked\n\nProperty: ${p.title}\nLocation: ${p.location}\nName: ${name}\nPhone: ${phone}\nTime: ${new Date().toLocaleString('en-IN')}`;
+  sendTelegramNotification(msg);
+}
+
+async function sendTelegramNotification(text){
+  const BOT_TOKEN = "8928937417:AAE_egr_SJ56rN1bDQVDgfErWDGSDTTYoSY";
+  const CHAT_ID = "8794130975";
+  if(BOT_TOKEN.includes('PASTE')) return;
+  try{
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: CHAT_ID, text })
+    });
+  }catch(e){ console.error('Telegram notify failed', e); }
+}
+
 function closeModal(){ $('#overlay').classList.remove('show'); }
 function shiftGallery(id, dir){
   const p = window._galleryData;
@@ -602,12 +702,21 @@ function renderAdminSection(){
       <div class="full"><label>Description</label><textarea id="f_desc" placeholder="Key details, amenities, legal status, why this is a good deal..."></textarea></div>
       <div><label>Contact Number</label><input id="f_contact" placeholder="e.g. +91 98765 43210"></div>
       <div><label>Video Link (YouTube / Instagram) — optional</label><input id="f_video" placeholder="https://..."></div>
+      <div class="full"><label>Urgency Text (optional)</label><input id="f_urgency" placeholder="e.g. Only 3 units left in this configuration"></div>
+      <div class="full">
+        <label>Value Highlights (shown as badges)</label>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);text-transform:none;letter-spacing:0;"><input type="checkbox" id="f_hl_price" style="width:auto;"> Special Negotiated Price</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);text-transform:none;letter-spacing:0;"><input type="checkbox" id="f_hl_visit" style="width:auto;"> Free Site Visit</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);text-transform:none;letter-spacing:0;"><input type="checkbox" id="f_hl_loan" style="width:auto;"> Bank Loan Support</label>
+        </div>
+      </div>
       <div class="full">
         <label>Photos</label>
         <div class="photo-drop" id="dropZone">Click to select photos (JPG/PNG, up to 6 recommended)</div>
         <input type="file" id="f_photos" accept="image/*" multiple style="display:none;">
         <div class="thumbs" id="thumbs"></div>
-        <div class="hint">Photos are auto-compressed for fast loading. Videos should be linked, not uploaded.</div>
+        <div class="hint">Photos are auto-compressed and watermarked automatically. Videos should be linked, not uploaded.</div>
       </div>
     </div>
     <div class="save-row">
@@ -624,14 +733,24 @@ function renderAdminSection(){
   $('#clearBtn').onclick = ()=>{ draftPhotos=[]; renderAdminSection(); };
 }
 
+let _logoImg = null;
+function getLogoImg(){
+  if(_logoImg) return Promise.resolve(_logoImg);
+  return new Promise(resolve=>{
+    const img = new Image();
+    img.onload = ()=>{ _logoImg = img; resolve(img); };
+    img.onerror = ()=> resolve(null);
+    img.src = document.querySelector('.main-logo')?.src || '';
+  });
+}
+
 function handlePhotoInput(e){
   const files = Array.from(e.target.files).slice(0, 8);
-  let remaining = files.length;
   files.forEach(file=>{
     const reader = new FileReader();
     reader.onload = ev=>{
       const img = new Image();
-      img.onload = ()=>{
+      img.onload = async ()=>{
         const canvas = document.createElement('canvas');
         const maxW = 1000;
         const scale = Math.min(1, maxW / img.width);
@@ -639,6 +758,17 @@ function handlePhotoInput(e){
         canvas.height = img.height * scale;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const logo = await getLogoImg();
+        if(logo){
+          const wmW = canvas.width * 0.16;
+          const wmH = wmW * (logo.height / logo.width);
+          const pad = canvas.width * 0.025;
+          ctx.globalAlpha = 0.55;
+          ctx.drawImage(logo, canvas.width - wmW - pad, canvas.height - wmH - pad, wmW, wmH);
+          ctx.globalAlpha = 1;
+        }
+
         const dataUrl = canvas.toDataURL('image/jpeg', 0.55);
         draftPhotos.push(dataUrl);
         renderThumbs();
@@ -675,6 +805,12 @@ async function handleSave(){
     description: $('#f_desc').value.trim(),
     contact: $('#f_contact').value.trim(),
     video: $('#f_video').value.trim(),
+    urgency: $('#f_urgency').value.trim(),
+    highlights: {
+      price: $('#f_hl_price').checked,
+      visit: $('#f_hl_visit').checked,
+      loan: $('#f_hl_loan').checked
+    },
     photos: draftPhotos.slice(),
     createdAt: Date.now()
   };

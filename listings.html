@@ -687,6 +687,20 @@ function renderAdminSection(){
   wrap.innerHTML = '';
   if(!isAgent) return;
 
+  if(activeFilter !== 'All'){
+    const notesPanel = el('div','admin-panel');
+    notesPanel.style.marginBottom = '18px';
+    notesPanel.innerHTML = `
+      <h2 class="serif">Quick Add — Paste Notes (${activeFilter})</h2>
+      <div class="hint" style="margin-bottom:10px;">Paste your raw listing text below (with emojis, as usual) — it'll auto-fill the form below. Category will be set to "${activeFilter}" automatically.</div>
+      <textarea id="notesInput" placeholder="Paste your listing text here..." style="min-height:140px;"></textarea>
+      <div class="save-row">
+        <button class="btn-primary" id="parseNotesBtn">Auto-Fill Form Below</button>
+      </div>
+    `;
+    wrap.appendChild(notesPanel);
+  }
+
   const panel = el('div','admin-panel');
   panel.innerHTML = `
     <h2 class="serif">Add New Listing</h2>
@@ -731,6 +745,41 @@ function renderAdminSection(){
   $('#f_photos').onchange = handlePhotoInput;
   $('#saveBtn').onclick = handleSave;
   $('#clearBtn').onclick = ()=>{ draftPhotos=[]; renderAdminSection(); };
+  if(activeFilter !== 'All'){
+    $('#parseNotesBtn').onclick = parseNotesAndFill;
+  }
+}
+
+function parseNotesAndFill(){
+  const raw = $('#notesInput').value;
+  if(!raw.trim()) return;
+
+  const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+
+  const titleLine = lines[0] || '';
+  const title = titleLine.replace(/^[^\p{L}\p{N}]+/u, '').replace(/[^\p{L}\p{N}]+$/u, '').trim();
+
+  const locLine = lines.find(l => /📍/.test(l));
+  const location = locLine ? locLine.replace(/📍/g,'').trim() : '';
+
+  const areaMatch = raw.match(/([\d,]+)\s*sq\.?\s*ft/i);
+  const area = areaMatch ? areaMatch[1].replace(/,/g,'') : '';
+
+  const bhkMatch = raw.match(/(\d+)\s*BHK/i);
+  const bedrooms = bhkMatch ? bhkMatch[1] : '';
+
+  const phoneMatch = raw.match(/\b\d{10}\b/);
+  const contact = phoneMatch ? phoneMatch[0] : '';
+
+  $('#f_title').value = title;
+  $('#f_category').value = activeFilter;
+  $('#f_location').value = location;
+  if(area) $('#f_area').value = area;
+  if(bedrooms) $('#f_bedrooms').value = bedrooms;
+  if(contact) $('#f_contact').value = contact;
+  $('#f_desc').value = raw.trim();
+
+  document.querySelectorAll('.admin-panel')[1]?.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 let _logoImg = null;

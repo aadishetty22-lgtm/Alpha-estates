@@ -180,6 +180,16 @@
   .share-fab:hover{background:rgba(10,10,11,.85);color:var(--gold-bright);}
   .share-fab svg{width:15px;height:15px;}
   .photocount{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.6);color:var(--cream);font-size:11px;padding:3px 9px;border-radius:12px;}
+  .card .imgwrap.sold img{filter:grayscale(0.6) brightness(0.55);}
+  .sold-badge{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);
+    background:rgba(180,30,30,.92);color:#fff;font-size:15px;font-weight:700;letter-spacing:3px;
+    padding:6px 22px;border-radius:6px;border:2px solid rgba(255,255,255,.4);
+  }
+  .modal-sold-badge{
+    display:inline-flex;align-items:center;gap:6px;background:rgba(180,30,30,.18);border:1px solid rgba(220,60,60,.5);
+    color:#f08a8a;font-size:12.5px;padding:6px 12px;border-radius:20px;margin-top:10px;font-weight:600;
+  }
   .card .body{padding:11px 2px 0;}
   .card .top-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
   .card h3{margin:0;font-size:14.5px;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -288,6 +298,7 @@
     .card .price{font-size:13px;}
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -471,6 +482,13 @@ function renderNav(){
   });
 }
 
+function isAuctionSold(p){
+  if(p.category !== 'Auctions' || !p.auctionDate) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const ad = new Date(p.auctionDate); ad.setHours(0,0,0,0);
+  return ad < today;
+}
+
 function currency(v){
   if(!v) return '';
   const n = Number(v);
@@ -514,6 +532,10 @@ function renderCards(){
       if(p.photos.length>1) imgwrap.appendChild(el('div','photocount', '📷 '+p.photos.length));
     } else {
       imgwrap.appendChild(el('div','noimg','NO PHOTO YET'));
+    }
+    if(isAuctionSold(p)){
+      imgwrap.classList.add('sold');
+      imgwrap.appendChild(el('div','sold-badge','SOLD'));
     }
     const shareFab = el('button','share-fab','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>');
     shareFab.onclick = (e)=>{ e.stopPropagation(); window.open(waLink(p),'_blank'); };
@@ -581,6 +603,7 @@ function renderModalContent(p, unlocked){
       <h2 class="serif">${p.title}</h2>
       <div class="loc">📍 ${p.location}</div>
       <div class="price">${currency(p.price)}</div>
+      ${isAuctionSold(p) ? `<div class="modal-sold-badge">🔴 Auction Ended — Sold</div>` : ''}
       ${p.urgency ? `<div class="urgency-badge">🔥 ${p.urgency}</div>` : ''}
       ${highlightBadges.length ? `<div class="highlight-row">${highlightBadges.map(h=>`<span class="highlight-badge">${h}</span>`).join('')}</div>` : ''}
       <div class="stat-row">
@@ -687,6 +710,22 @@ function renderAdminSection(){
   wrap.innerHTML = '';
   if(!isAgent) return;
 
+  if(activeFilter === 'Auctions'){
+    const excelPanel = el('div','admin-panel');
+    excelPanel.style.marginBottom = '18px';
+    excelPanel.innerHTML = `
+      <h2 class="serif">Bulk Upload — Auctions via Excel</h2>
+      <div class="hint" style="margin-bottom:10px;">
+        Columns expected (any order): <b>Title, Location, Price, Bedrooms, Area, AuctionDate, Description, Urgency</b>.
+        Date format: DD/MM/YYYY or YYYY-MM-DD. Phone/contact columns are ignored automatically for privacy — never uploaded.
+      </div>
+      <input type="file" id="excelFile" accept=".xlsx,.xls,.csv">
+      <div id="excelPreview"></div>
+    `;
+    wrap.appendChild(excelPanel);
+    $('#excelFile').onchange = handleExcelUpload;
+  }
+
   if(activeFilter !== 'All'){
     const notesPanel = el('div','admin-panel');
     notesPanel.style.marginBottom = '18px';
@@ -715,6 +754,7 @@ function renderAdminSection(){
       <div><label>Area sq.ft (optional)</label><input id="f_area" type="number" placeholder="e.g. 1450"></div>
       <div class="full"><label>Description</label><textarea id="f_desc" placeholder="Key details, amenities, legal status, why this is a good deal..."></textarea></div>
       <div><label>Contact Number</label><input id="f_contact" placeholder="e.g. +91 98765 43210"></div>
+      <div><label>Auction Date (if applicable)</label><input id="f_auctiondate" type="date"></div>
       <div><label>Video Link (YouTube / Instagram) — optional</label><input id="f_video" placeholder="https://..."></div>
       <div class="full"><label>Urgency Text (optional)</label><input id="f_urgency" placeholder="e.g. Only 3 units left in this configuration"></div>
       <div class="full">
@@ -748,6 +788,131 @@ function renderAdminSection(){
   if(activeFilter !== 'All'){
     $('#parseNotesBtn').onclick = parseNotesAndFill;
   }
+}
+
+let _excelRows = [];
+
+function stripPhoneNumbers(str){
+  if(!str) return str;
+  return String(str).replace(/\b\d{10}\b/g, '').replace(/\+?\d{2,4}[-\s]?\d{10}\b/g, '').trim();
+}
+
+function excelDateToISO(val){
+  if(!val) return '';
+  if(typeof val === 'number'){
+    const d = XLSX.SSF.parse_date_code(val);
+    if(!d) return '';
+    return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  }
+  const s = String(val).trim();
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  return '';
+}
+
+function handleExcelUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    try{
+      const wb = XLSX.read(ev.target.result, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, {defval:''});
+
+      _excelRows = rows.map(r=>{
+        const get = (...keys)=>{
+          for(const k of keys){
+            const found = Object.keys(r).find(rk => rk.toLowerCase().replace(/[^a-z]/g,'') === k);
+            if(found && r[found] !== '') return r[found];
+          }
+          return '';
+        };
+        return {
+          title: stripPhoneNumbers(get('title','projectname','name')),
+          location: stripPhoneNumbers(get('location','area','place')),
+          price: get('price','amount'),
+          bedrooms: get('bedrooms','bhk'),
+          area: get('area','sqft','sq ft'),
+          auctionDate: excelDateToISO(get('auctiondate','date')),
+          description: stripPhoneNumbers(get('description','details','notes')),
+          urgency: stripPhoneNumbers(get('urgency'))
+        };
+      }).filter(r => r.title || r.location);
+
+      renderExcelPreview();
+    }catch(err){
+      console.error(err);
+      $('#excelPreview').innerHTML = `<div style="color:#e08787;margin-top:10px;">Could not read this file. Make sure it's a valid .xlsx/.xls/.csv file.</div>`;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderExcelPreview(){
+  const box = $('#excelPreview');
+  if(!_excelRows.length){
+    box.innerHTML = `<div style="color:var(--grey);margin-top:10px;">No usable rows found — check your column headers.</div>`;
+    return;
+  }
+  box.innerHTML = `
+    <div class="hint" style="margin:12px 0 8px;">${_excelRows.length} row(s) found. Phone/contact data (if any) has been automatically excluded. Review below, then confirm.</div>
+    <div style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <tr style="background:var(--panel-2);text-align:left;">
+          <th style="padding:8px;">Title</th><th style="padding:8px;">Location</th><th style="padding:8px;">Price</th><th style="padding:8px;">Auction Date</th>
+        </tr>
+        ${_excelRows.map(r=>`
+          <tr style="border-top:1px solid var(--line);">
+            <td style="padding:8px;">${r.title||'—'}</td>
+            <td style="padding:8px;">${r.location||'—'}</td>
+            <td style="padding:8px;">${r.price||'—'}</td>
+            <td style="padding:8px;">${r.auctionDate||'—'}</td>
+          </tr>`).join('')}
+      </table>
+    </div>
+    <div class="save-row">
+      <button class="btn-primary" id="confirmImportBtn">Confirm Import (${_excelRows.length})</button>
+    </div>
+  `;
+  $('#confirmImportBtn').onclick = confirmExcelImport;
+}
+
+async function confirmExcelImport(){
+  const btn = $('#confirmImportBtn');
+  btn.textContent = 'Importing...'; btn.disabled = true;
+  try{
+    for(const r of _excelRows){
+      const p = {
+        id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        title: r.title || 'Untitled Auction Property',
+        category: 'Auctions',
+        price: r.price || '',
+        location: r.location || '',
+        bedrooms: r.bedrooms || '',
+        area: r.area || '',
+        description: r.description || '',
+        contact: '',
+        video: '',
+        urgency: r.urgency || '',
+        auctionDate: r.auctionDate || '',
+        highlights: { price:false, visit:false, loan:false },
+        photos: [],
+        createdAt: Date.now()
+      };
+      await saveProperty(p);
+    }
+    alert(`${_excelRows.length} auction listing(s) imported! Add photos manually to each from the property list.`);
+    _excelRows = [];
+    $('#excelFile').value = '';
+    $('#excelPreview').innerHTML = '';
+  }catch(err){
+    console.error(err);
+    alert('Kuch listings import nahi hui — dobara try karo.');
+  }
+  btn.textContent = 'Confirm Import'; btn.disabled = false;
 }
 
 function parseNotesAndFill(){
@@ -854,6 +1019,7 @@ async function handleSave(){
     description: $('#f_desc').value.trim(),
     contact: $('#f_contact').value.trim(),
     video: $('#f_video').value.trim(),
+    auctionDate: $('#f_auctiondate').value || '',
     urgency: $('#f_urgency').value.trim(),
     highlights: {
       price: $('#f_hl_price').checked,

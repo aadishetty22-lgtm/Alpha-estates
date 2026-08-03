@@ -566,7 +566,8 @@ function renderCards(){
     const body = el('div','body');
     body.appendChild(el('div','cat-label', p.category));
     const topRow = el('div','top-row');
-    topRow.appendChild(el('h3', null, p.title));
+    const displayTitle = isAgent ? p.title : `${p.category} in ${p.location || 'this area'}`;
+    topRow.appendChild(el('h3', null, displayTitle));
     body.appendChild(topRow);
     body.appendChild(el('div','loc', p.location));
     const meta = el('div','meta');
@@ -591,20 +592,20 @@ function renderCards(){
   });
 }
 
-const unlockedSet = new Set();
-
 function openModal(p){
   galleryIndex[p.id] = 0;
   window._galleryData = p;
-  renderModalContent(p, isAgent || unlockedSet.has(p.id));
+  renderModalContent(p, isAgent);
   $('#overlay').classList.add('show');
 }
 
-function renderModalContent(p, unlocked){
+const submittedSet = new Set();
+
+function renderModalContent(p, isAgentView){
   const box = $('#modalBox');
   const allPhotos = (p.photos && p.photos.length) ? p.photos : null;
-  const visiblePhotos = unlocked ? allPhotos : (allPhotos ? [allPhotos[0]] : null);
-  const extraCount = allPhotos ? Math.max(0, allPhotos.length - 1) : 0;
+  const hasSubmitted = submittedSet.has(p.id);
+  const displayTitle = isAgentView ? p.title : `${p.category} in ${p.location || 'this area'}`;
 
   const highlightBadges = [];
   if(p.highlights && p.highlights.price) highlightBadges.push('💰 Special Negotiated Price');
@@ -614,17 +615,16 @@ function renderModalContent(p, unlocked){
   box.innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="gallery" id="galleryWrap">
-      ${visiblePhotos ? `<img id="galleryImg" src="${visiblePhotos[0]}">
-        ${unlocked && visiblePhotos.length>1 ? `
+      ${allPhotos ? `<img id="galleryImg" src="${allPhotos[0]}">
+        ${allPhotos.length>1 ? `
         <button class="gallery-nav prev" onclick="shiftGallery('${p.id}',-1)">‹</button>
         <button class="gallery-nav next" onclick="shiftGallery('${p.id}',1)">›</button>
-        <div class="gallery-dots" id="dots">${visiblePhotos.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : ''}
-        ${!unlocked && extraCount>0 ? `<div class="photocount" style="left:10px;right:auto;">🔒 +${extraCount} more</div>` : ''}
+        <div class="gallery-dots" id="dots">${allPhotos.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : ''}
       ` : `<div class="noimg" style="height:100%;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M5 21V9l4-3 4 3v12M13 21v-6l4-2 4 2v6"/><path d="M8 12h1M8 15h1M17 13h1M17 16h1"/></svg><span>Photos Coming Soon</span></div>`}
     </div>
     <div class="modal-body">
       <div class="cat">${p.category}</div>
-      <h2 class="serif">${p.title}</h2>
+      <h2 class="serif">${displayTitle}</h2>
       <div class="loc">📍 ${p.location}</div>
       <div class="price">${currency(p.price)}</div>
       ${isAuctionSold(p) ? `<div class="modal-sold-badge">🔴 Auction Ended — Sold</div>` : ''}
@@ -636,32 +636,37 @@ function renderModalContent(p, unlocked){
         ${p.area? `<div>Area<b>${p.area} sq.ft</b></div>`:''}
         <div>Category<b>${p.category}</b></div>
       </div>
-      ${unlocked ? `
-        <div class="desc">${(p.description||'No description added yet.')}</div>
-        ${p.video? `<a class="video-link" href="${p.video}" target="_blank">▶ Watch Video Tour</a>` : ''}
-        ${p.contact? `<div class="contact-line">Contact: ${p.contact}</div>` : ''}
+      <div class="desc">${(p.description||'No description added yet.')}</div>
+      ${p.video? `<a class="video-link" href="${p.video}" target="_blank">▶ Watch Video Tour</a>` : ''}
+      ${isAgentView && p.contact? `<div class="contact-line">Contact: ${p.contact}</div>` : ''}
+      ${!isAgentView ? (hasSubmitted ? `
+        <div class="lock-panel">
+          <div class="lock-icon">✅</div>
+          <div class="lock-title">Thanks! We've Got Your Details</div>
+          <div class="lock-sub">Our agent will WhatsApp/Call you shortly with the exact project name, location & site visit details.</div>
+        </div>
       ` : `
         <div class="lock-panel">
           <div class="lock-icon">🔒</div>
-          <div class="lock-title">Full Pricing Breakdown${extraCount>0? ` & ${extraCount} More Photos` : ''} Locked</div>
-          <div class="lock-sub">Enter your number to unlock complete details, floor plans & exclusive pricing.</div>
+          <div class="lock-title">Exact Project Name & Location</div>
+          <div class="lock-sub">Share your number and our agent will reveal the exact project, address & arrange a site visit.</div>
           <input id="unlock_name" placeholder="Your Name">
           <input id="unlock_phone" placeholder="Your Phone Number" type="tel">
-          <button class="btn-primary" id="unlockBtn" style="width:100%;justify-content:center;">Unlock Full Details</button>
+          <button class="btn-primary" id="unlockBtn" style="width:100%;justify-content:center;">Get Project Details</button>
           <div id="unlockError" style="color:#e08787;font-size:12px;margin-top:8px;"></div>
         </div>
-      `}
+      `) : ''}
       <div class="modal-actions">
         <a href="${waLink(p)}" target="_blank" class="btn-primary" style="color:#0a0a0b;">Enquire Now</a>
       </div>
     </div>
   `;
 
-  if(!unlocked){
+  if(!isAgentView && !hasSubmitted){
     $('#unlockBtn').onclick = ()=>handleUnlock(p);
   }
 
-  if(unlocked && visiblePhotos && visiblePhotos.length>1){
+  if(allPhotos && allPhotos.length>1){
     const wrap = $('#galleryWrap');
     let touchStartX = 0;
     wrap.addEventListener('touchstart', e=>{ touchStartX = e.changedTouches[0].screenX; }, {passive:true});
@@ -680,12 +685,12 @@ async function handleUnlock(p){
     return;
   }
   const btn = $('#unlockBtn');
-  btn.textContent = 'Unlocking...'; btn.disabled = true;
+  btn.textContent = 'Sending...'; btn.disabled = true;
   try{
     await saveLead(p, name, phone);
   }catch(e){ console.error(e); }
-  unlockedSet.add(p.id);
-  renderModalContent(p, true);
+  submittedSet.add(p.id);
+  renderModalContent(p, isAgent);
 }
 
 async function saveLead(p, name, phone){
@@ -696,7 +701,7 @@ async function saveLead(p, name, phone){
     category: p.category, location: p.location,
     createdAt: Date.now()
   });
-  const msg = `🔓 Alpha Estates — Details Unlocked\n\nProperty: ${p.title}\nLocation: ${p.location}\nName: ${name}\nPhone: ${phone}\nTime: ${new Date().toLocaleString('en-IN')}`;
+  const msg = `🔔 Alpha Estates — New Interest\n\nProject: ${p.title}\nLocation: ${p.location}\nName: ${name}\nPhone: ${phone}\nTime: ${new Date().toLocaleString('en-IN')}`;
   sendTelegramNotification(msg);
 }
 
@@ -755,6 +760,22 @@ function renderAdminSection(){
     `;
     wrap.appendChild(excelPanel);
     $('#excelFile').onchange = handleExcelUpload;
+  }
+
+  if(activeFilter === 'Properties'){
+    const exportPanel = el('div','admin-panel');
+    exportPanel.style.marginBottom = '18px';
+    const count = properties.filter(p=>p.category==='Properties').length;
+    exportPanel.innerHTML = `
+      <h2 class="serif">Export Properties to Excel</h2>
+      <div class="hint" style="margin-bottom:10px;">
+        Exports all ${count} "Properties" listing(s) into your sheet format. Columns we can auto-fill: <b>Project Name, Configuration, Carpet Area, Price (1/2/3 BHK), Extra Scheme, Contact Number, Notes</b>.
+        The rest (Builder Name, Storey Tower, Brochure, Price Sheet, etc.) aren't captured by this app — those stay empty for you to fill in Excel.
+      </div>
+      <button class="btn-primary" id="exportExcelBtn">Export ${count} Listing(s)</button>
+    `;
+    wrap.appendChild(exportPanel);
+    $('#exportExcelBtn').onclick = exportPropertiesToExcel;
   }
 
   const panel = el('div','admin-panel');
@@ -878,6 +899,44 @@ function parseQuickNotes(raw){
   const priceMatch = raw.match(/₹\s*([\d,]+)/);
   const price = priceMatch ? priceMatch[1].replace(/,/g,'') : '';
   return { title: title || 'Untitled Listing', location, area, bedrooms, price };
+}
+
+const EXPORT_HEADERS = [
+  'Location (East/West)','Builder Name','Project Name','rtmi /uc','Possession timeline',
+  'Storey tower','storey tower name','Configuration','Carpet Area','builtup/saleable area',
+  'Price 1BHK','Price 2BHK','Price 3BHK','Box Price','CP Brokerage','Extra Scheme',
+  'Contact Person','Contact Number','Brochure','Price Sheet','Sample Flat','Notes'
+];
+
+function exportPropertiesToExcel(){
+  const rows = properties.filter(p => p.category === 'Properties').map(p=>{
+    const bhk = p.bedrooms ? String(p.bedrooms) : '';
+    const scheme = [
+      p.highlights && p.highlights.price ? 'Special Negotiated Price' : '',
+      p.highlights && p.highlights.visit ? 'Free Site Visit' : '',
+      p.highlights && p.highlights.loan ? 'Bank Loan Support' : ''
+    ].filter(Boolean).join('; ');
+
+    const row = {};
+    EXPORT_HEADERS.forEach(h => row[h] = '');
+    row['Project Name'] = p.title || '';
+    row['Configuration'] = bhk ? bhk+'BHK' : '';
+    row['Carpet Area'] = p.area || '';
+    if(bhk === '1') row['Price 1BHK'] = p.price || '';
+    if(bhk === '2') row['Price 2BHK'] = p.price || '';
+    if(bhk === '3') row['Price 3BHK'] = p.price || '';
+    row['Extra Scheme'] = scheme;
+    row['Contact Number'] = p.contact || '';
+    row['Notes'] = p.description || '';
+    return row;
+  });
+
+  if(!rows.length){ alert('Abhi koi "Properties" listing nahi hai export karne ke liye.'); return; }
+
+  const ws = XLSX.utils.json_to_sheet(rows, {header: EXPORT_HEADERS});
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Properties');
+  XLSX.writeFile(wb, `Alpha_Estates_Properties_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 let _excelRows = [];
